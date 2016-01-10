@@ -9,7 +9,7 @@ public class Shell {
 	private EMainSections section;
 	private EMainSections selectedClass = EMainSections.DATASOURCE;
 
-	private Solution course;
+	private Question course;
 	private Question teacher;
 	private Answer student;
 
@@ -169,7 +169,7 @@ public class Shell {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Navigation-spaghetti
 	private void navigate() {
-		ISolution c = null;
+		IQuestion c = null;
 
 		switch (getSection()) {
 		case QUESTION:
@@ -181,13 +181,13 @@ public class Shell {
 					break;
 				case 2:
 					if (this.name.length() > 0) {
-						this.course = (Solution) ExamenVerwaltung.getNewSolution(this.name.toString());
+						this.course = (Question) ExamenVerwaltung.getNewSolution(this.name.toString());
 						setSelection(selection);
 					} else {
-						this.course = (Solution) ExamenVerwaltung.getNewSolution(true);
+						this.course = (Question) ExamenVerwaltung.getNewSolution(true);
 					}
 					setSelectedClass(EMainSections.QUESTION);
-					System.out.println(this.course.getCourseName() + " angelegt.");
+					System.out.println(this.course.getQuestionName() + " angelegt.");
 					break;
 				case 3:
 					setSection(EMainSections.EXAM);
@@ -204,7 +204,7 @@ public class Shell {
 				switch (this.input) {
 				case 1:
 					try {
-						this.course = (Solution) getICourse(this.getSelection());
+						this.course = (Question) getICourse(this.getSelection());
 						setSelectedClass(EMainSections.QUESTION);
 					} catch (Exception e) {
 						this.course = null;
@@ -215,11 +215,12 @@ public class Shell {
 					break;
 				case 2:
 					try {
-						this.course = (Solution) getICourse(this.getSelection());
+						this.course = (Question) getICourse(this.getSelection());
 						setSelectedClass(EMainSections.QUESTION);
 						System.out.println(this.course.getDescription());
-						if (this.course.hasQuestion()) {
-							System.out.println("Leerer: " + this.course.getQuestion().toString());
+						if (this.course.hasExam()) {
+							//TODO: quickfix, verify!
+							System.out.println("Leerer: " + this.course.getQuestions().toString());
 						}
 						if (this.course.hasAnswers()) {
 							System.out.println("Schüler:");
@@ -235,7 +236,7 @@ public class Shell {
 					break;
 				case 3:
 					try {
-						this.course = (Solution) getICourse(this.getSelection());
+						this.course = (Question) getICourse(this.getSelection());
 						setSelectedClass(EMainSections.QUESTION);
 					} catch (Exception e) {
 						this.course = null;
@@ -340,8 +341,8 @@ public class Shell {
 				switch (this.input) {
 				case 1:
 					try {
-						this.teacher.addSolution(c);
-						c.setQuestion(this.teacher);
+						this.teacher.addQuestion(c);
+						c.addQuestion(this.teacher);
 					} catch (Exception e) {
 						System.out.println("Kurs " + this.getSelection() + " setzen fehlgeschlagen.");
 						e.printStackTrace();
@@ -369,8 +370,9 @@ public class Shell {
 				case 1:
 					try {
 						c = this.getICourse(getSelection());
-						c.removeQuestion();
-						this.teacher.deleteSolution(c);
+						//TODO: quickfix, verify!
+						c.deleteQuestion(c);
+						this.teacher.deleteQuestion(c);
 					} catch (Exception e) {
 						System.out.println("Kurs " + this.getSelection() + " entfernen fehlgeschlagen.");
 						e.printStackTrace();
@@ -395,7 +397,7 @@ public class Shell {
 						this.student = (Answer) ExamenVerwaltung.getNewStudent(this.name.toString());
 						setSelection(selection);
 					} else {
-						this.student = (Answer) ExamenVerwaltung.getNewStudent(true);
+						this.student = (Answer) ExamenVerwaltung.getNewAnswer(true);
 					}
 					setSelectedClass(EMainSections.ANSWER);
 					System.out.println(this.student.toString() + " angelegt.");
@@ -531,7 +533,7 @@ public class Shell {
 			if (this.getSelectedClass() == EMainSections.QUESTION) {
 				switch (this.input) {
 				case 1: // Kursname bearbeiten
-					this.course.setCourseName(this.name.toString());
+					this.course.setQuestionName(this.name.toString());
 					break;
 				case 2: // Fach bearbeiten
 //					this.course.setTopic(this.name.toString());
@@ -641,7 +643,7 @@ public class Shell {
 			case 1:
 				header.setLength(0);
 				header.append("Sie befinden sich auf <Kurse>");
-				name = "1. Liste aller Kurse (" + ExamenVerwaltung.getSolutionList().size() + ") anzeigen\r\n";
+				name = "1. Liste aller Kurse (" + ExamenVerwaltung.getQuestionList().size() + ") anzeigen\r\n";
 				name += "2. Einen Kurs <...> anlegen\r\n";
 				name += "3. Zu Leerer wechseln\r\n";
 				name += "4. Zu Schüler wechseln\r\n";
@@ -681,7 +683,7 @@ public class Shell {
 			case 1:
 				header.setLength(0);
 				header.append("Sie befinden sich auf <Schüler>");
-				name = "1. Liste aller Schüler(" + ExamenVerwaltung.getStudentList().size() + ") anzeigen\r\n";
+				name = "1. Liste aller Schüler(" + ExamenVerwaltung.getAnswerList().size() + ") anzeigen\r\n";
 				name += "2. Einen Schüler <...> anlegen\r\n";
 				name += "3. Zu Kurse wechseln\r\n";
 				name += "4. Zu Leerer wechseln\r\n";
@@ -706,7 +708,7 @@ public class Shell {
 				setSection(EMainSections.ANSWER);
 				name = "1. Kurs <X> hinzufügen\r\n";
 				name += "2. Kurs "
-						+ ((this.student.getSolution() == null) ? "" : this.student.getSolution().toString() + " ")
+						+ ((this.student.getQuestion() == null) ? "" : this.student.getQuestion().toString() + " ")
 						+ "entfernen\r\n";
 				name += "3. Zurück";
 				break;
@@ -736,7 +738,7 @@ public class Shell {
 			case 3:
 				header.setLength(0);
 				header.append("Sie befinden sich auf <Leerer><Liste><" + getSelectedName()
-						+ ((this.teacher.getSolutionCount() > 0) ? "(" + this.teacher.getSolutionCount() + ")" : "") + ">"
+						+ ((this.teacher.getQuestionCount() > 0) ? "(" + this.teacher.getQuestionCount() + ")" : "") + ">"
 
 						+ "\r\nDie verfügbare Kurse sind:\r\n");
 				setSection(EMainSections.QUESTION);
@@ -749,7 +751,7 @@ public class Shell {
 			case 4:
 				header.setLength(0);
 				header.append("Sie befinden sich auf <Leerer><Liste><" + getSelectedName() + ">"
-						+ ((this.teacher.getSolutionCount() > 0) ? "(" + this.teacher.getSolutionCount() + ")" : "")
+						+ ((this.teacher.getQuestionCount() > 0) ? "(" + this.teacher.getQuestionCount() + ")" : "")
 						+ "\r\nSeine gehaltenen Kurse sind:\r\n");
 				setSection(EMainSections.DATASOURCE);
 				header.append(getList());
@@ -803,7 +805,7 @@ public class Shell {
 		ArrayList list = null;
 		switch (getSection()) {
 		case QUESTION:
-			list = ExamenVerwaltung.getSolutionList();
+			list = ExamenVerwaltung.getQuestionList();
 			for (int index = 1; index <= list.size(); index++) {
 				ret.append(index + ". " + list.get(index - 1).toString() + "\n");
 			}
@@ -817,7 +819,7 @@ public class Shell {
 		case EDITOR:
 			break;
 		case ANSWER:
-			list = ExamenVerwaltung.getStudentList();
+			list = ExamenVerwaltung.getAnswerList();
 			for (int index = 1; index <= list.size(); index++) {
 				ret.append(index + ". " + list.get(index - 1).toString() + "\n");
 			}
@@ -871,16 +873,16 @@ public class Shell {
 		return section;
 	}
 
-	public ISolution getICourse(int i) {
-		return (ISolution) Solution.getCourses().get(i - 1);
+	public IQuestion getICourse(int i) {
+		return (IQuestion) Question.getQuestions().get(i - 1);
 	}
 
 	public IQuestion getITeacher(int i) {
-		return (IQuestion) Question.getTeachers().get(i - 1);
+		return (IQuestion) Question.getQuestions().get(i - 1);
 	}
 
 	public IAnswer getIStudent(int i) {
-		return (IAnswer) Answer.getStudents().get(i - 1);
+		return (IAnswer) Answer.getAnswers().get(i - 1);
 	}
 
 	public void setSection(EMainSections section) {

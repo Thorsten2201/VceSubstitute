@@ -1,5 +1,6 @@
 package de.bbq.java.tasks.vce;
 
+import java.awt.Image;
 import java.util.ArrayList;
 
 /**
@@ -13,21 +14,28 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
+	// Properties to serialize
+	private char index;
+	private String AnswerText;
+	private boolean isTrue;
+	/////////////////////////////////////////////////////////////////////////////////////
+	
+	/////////////////////////////////////////////////////////////////////////////////////
 	// Construct
-	private Answer(String firstName, EDaoSchool eDataAccess) throws Exception {
+	private Answer(String name, EDaoSchool eDataAccess) throws Exception {
 		super(eDataAccess);
-		//super.setFirstName(firstName);
+		super.setName(name);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = -8838146635169751075L;
-	private static ArrayList<IAnswer> allStudents = new ArrayList<>();
+	private static ArrayList<IAnswer> allAnswers = new ArrayList<>();
 
 	public static boolean load(Answer answer) {
 		answer.id = ExamItemAbstract.getNewId();
-		allStudents.add(answer);
+		allAnswers.add(answer);
 		return true;
 	}
 
@@ -36,52 +44,53 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 				"Baumschulabbrecher", "Volldepp", "Volltrottel", "Extremdepp", "Superidiot", "Dummbeutel",
 				"Trottelkopf", "Hirngesicht", "Bauer", "Viehbauer", "Behindikind" };
 		int randomNum = 0 + (int) (Math.random() * array.length);
-		return array[randomNum];
+		return ExamenVerwaltung.getText("Answer") + " " + (allAnswers.size() + 1); // array[randomNum];
 	}
 
-	public static Answer createStudent(String firstName, EDaoSchool eDataAccess) {
+	public static Answer createAnswer(String name, EDaoSchool eDataAccess) {
 		Answer answer = null;
 		try {
-			answer = new Answer(firstName, eDataAccess);
-			allStudents.add(answer);
+			answer = new Answer(name, eDataAccess);
+			allAnswers.add(answer);
 		} catch (Exception e) {
 			ExamenVerwaltung.showException(e);
 		}
 		return answer;
 	}
 
-	public static Answer createStudent(boolean random, EDaoSchool eDataAccess) {
+	public static Answer createAnwer(boolean random, EDaoSchool eDataAccess) {
 		String newName = Answer.generateNewName();
-		Answer newStudent = null;
+		Answer newAnswer = null;
 		if (!random) {
-			newName = ExamenVerwaltung.showInput("Bitte einen Namen eingeben:");
+			newName = ExamenVerwaltung.showInput("please.enter.name");
 		}
-		newStudent = Answer.createStudent(newName, eDataAccess);
-		return newStudent;
+		newAnswer = Answer.createAnswer(newName, eDataAccess);
+		return newAnswer;
 	}
 
-	public static ArrayList<IAnswer> getStudents() {
-		return allStudents;
+	public static ArrayList<IAnswer> getAnswers() {
+		return allAnswers;
 	}
 
 	public static void answerDeleted(IAnswer answer) {
-		if (allStudents.contains(answer)) {
-			allStudents.remove(answer);
+		if (allAnswers.contains(answer)) {
+			allAnswers.remove(answer);
 		}
 	}
 
 	public static void reset() {
-		allStudents = new ArrayList<>();
+		allAnswers = new ArrayList<>();
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
+
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Getter / Setter IStudent
 	@Override
-	public ISolution getSolution() {
-		for (ISolution c : Solution.getCourses()) {
-			if (c.hasAnswer(this)) {
-				return c;
+	public IQuestion getQuestion() {
+		for (IQuestion q : Question.getQuestions()) {
+			if (q.hasAnswer(this)) {
+				return q;
 			}
 		}
 		return null;
@@ -90,45 +99,33 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 	@Override
 	public String getDescription() {
 		StringBuffer bu = new StringBuffer();
-//TODO:		bu.append(this.getFirstName() + " " + getLastName() + "\n");
-//		if (this.getBirthDate() != null) {
-//			bu.append(ExamenVerwaltung.getGermanDate().format(this.getBirthDate()) + "\n");
-//		}
-//		bu.append(this.getAdress().getDescription());
+		if (this.hasQuestion()) {
+			bu.append(index + " " + this.getQuestion().getQuestionName());
+		} else {
+			bu.append(index + " " + this.getName().toString());
+		}
 		return bu.toString();
 	}
-	// @Override
-	// public void setCourse(ICourse course) {
-	// this.course = course;
-	// }
-	//
-	// @Override
-	// public void removeCourse() {
-	// this.course = null;
-	// }
+
 
 	@Override
-	public boolean hasSolution(ISolution course) {
-		if (course != null) {
-			return course.equals(this.getSolution());
-		} else {
-			return false;
-		}
+	public String toString() {
+		return super.getName();
 	}
-
+	
 	@Override
 	public boolean hasQuestion() {
-		return this.getSolution() != null;
+		return this.getQuestion() != null;
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
 
 	@Override
 	public boolean hasQuestion(IQuestion question) {
 		if (question != null) {
-			return question.equals(this.getSolution());
+			return question.equals(this.getQuestion());
 		} else {
 			return false;
 		}
 		
 	}
+	/////////////////////////////////////////////////////////////////////////////////////
 }

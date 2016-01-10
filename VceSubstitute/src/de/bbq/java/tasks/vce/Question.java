@@ -1,5 +1,6 @@
 package de.bbq.java.tasks.vce;
 
+import java.awt.Image;
 import java.util.ArrayList;
 
 /**
@@ -9,7 +10,18 @@ import java.util.ArrayList;
 public class Question extends ExamItemAbstract implements IQuestion {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Class Properties
-	private transient ArrayList<ISolution> solutions = new ArrayList<>();
+	private ArrayList<IAnswer> answers = new ArrayList<>();
+	/////////////////////////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// Properties to serialize
+	private int number;
+	private String language;
+	private String questionText;
+	private Image questionImage;
+	private String questionFooter;
+	private String answerExpailnation;
+	private int imageLine;
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -17,17 +29,18 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	private Question(String name, EDaoSchool eDataAccess) throws Exception {
 		super(eDataAccess);
 		super.setName(name);
+		this.number = allQuestions.size() + 1;
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = -3548796163205043453L;
-	private static ArrayList<IQuestion> allTeachers = new ArrayList<>();
+	private static ArrayList<IQuestion> allQuestions = new ArrayList<>();
 
-	public static boolean load(Question teacher) {
-		allTeachers.add(teacher);
-		teacher.id = ExamItemAbstract.getNewId();
+	public static boolean load(Question question) {
+		allQuestions.add(question);
+		question.id = ExamItemAbstract.getNewId();
 		return true;
 	}
 
@@ -35,15 +48,16 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		String[] array = new String[] { "Geistig Abwesender", "Laubbläsleer", "Labersack", "Zutexter", "Volllaberer",
 				"Berieseler", "Hintergrundrauschen", "Verstörendes Geräusch", "Dildogesicht", "Halodri",
 				"Birkenstockdepp", "Fotzenkopf", "Hirschfresse", "Althippy", "Schnarchnase" };
+		@SuppressWarnings("unused")
 		int randomNum = 0 + (int) (Math.random() * array.length);
-		return array[randomNum];
+		return ExamenVerwaltung.getText("Question") + " " + (allQuestions.size() + 1);// :array[randomNum];
 	}
 
 	public static Question createQuestion(String firstName, EDaoSchool eDataAccess) {
 		Question teacher = null;
 		try {
 			teacher = new Question(firstName, eDataAccess);
-			allTeachers.add(teacher);
+			allQuestions.add(teacher);
 		} catch (Exception e) {
 			ExamenVerwaltung.showException(e);
 		}
@@ -54,27 +68,27 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		String newName = Question.generateNewName();
 		Question newTeacher = null;
 		if (!random) {
-			newName = ExamenVerwaltung.showInput("Bitte einen Namen eingeben:");
+			newName = ExamenVerwaltung.showInput("please.enter.name");
 		}
 		newTeacher = Question.createQuestion(newName, eDataAccess);
 		return newTeacher;
 	}
 
-	public static ArrayList<IQuestion> getTeachers() {
-		return allTeachers;
+	public static ArrayList<IQuestion> getQuestions() {
+		return allQuestions;
 	}
 
-	public static void teacherDeleted(ExamItemAbstract editItem) {
-		if (allTeachers.contains(editItem)) {
-			allTeachers.remove(editItem);
+	public static void questionDeleted(ExamItemAbstract editItem) {
+		if (allQuestions.contains(editItem)) {
+			allQuestions.remove(editItem);
 		}
 	}
 
-	private static int getCourseCount(Question teacher) {
+	private static int getQuestionCount(Question question) {
 		int cnt = 0;
-		for (ISolution c : Solution.getCourses()) {
-			if (c.hasQuestion()) {
-				if (c.getQuestion().equals(teacher)) {
+		for (IExam e : Exam.getExams()) {
+			for (IQuestion q : e.getQuestions()) {
+				if (q.equals(question)) {
 					cnt++;
 				}
 			}
@@ -83,31 +97,23 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	}
 
 	public static void reset() {
-		allTeachers = new ArrayList<>();
+		allQuestions = new ArrayList<>();
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
-	// Getter / Setter ITeacher
-	@Override
-	public void addSolution(ISolution course) {
-		this.getCourses().add(course);
-		course.setQuestion(this);
-	}
-
-	private ArrayList<ISolution> getCourses() {
-		if (this.solutions == null) {
-			this.solutions = new ArrayList<>();
+	private static ArrayList<IQuestion> getAllQuestions() {
+		if (allQuestions == null) {
+			allQuestions = new ArrayList<>();
 		}
-		return solutions;
+		return allQuestions;
 	}
 
 	@Override
-	public void deleteSolution(ISolution course) {
-		course.removeQuestion();
-		for (ISolution courses : this.getCourses()) {
-			if (courses.equals(course)) {
-				this.getCourses().remove(course);
+	public void deleteQuestion(IQuestion question) {
+		question.deleteQuestion(question);
+		for (IQuestion q : getAllQuestions()) {
+			if (q.equals(question)) {
+				getAllQuestions().remove(question);
 				break;
 			}
 
@@ -115,10 +121,65 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	}
 
 	@Override
+	public boolean hasAnswers() {
+		return this.getAnswers().size() > 0;
+	}
+
+	@Override
+	public boolean hasExam() {
+		for (IExam e : ExamenVerwaltung.getExamList()) {
+			if (e.getQuestions().contains(this)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public ArrayList<IAnswer> getAnswers() {
+		return answers;
+	}
+
+	@Override
+	public void addAnswer(IAnswer answer) {
+		answers.add(answer);
+	}
+
+	@Override
+	public void removeAnswer(IAnswer answer) {
+		if (answers.contains(answer)) {
+			answers.remove(answer);
+		}
+	}
+
+	@Override
+	public boolean hasAnswer(IAnswer answer) {
+		if (answers.contains(answer)) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public IExam getExam() {
+		for (IExam e : ExamenVerwaltung.getExamList()) {
+			if (e.getQuestions().contains(this)) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void addQuestion(IQuestion question) {
+		getAllQuestions().add(question);
+	}
+
+	@Override
 	public String getDescription() {
 		StringBuffer bu = new StringBuffer();
 		bu.append(this.getName() + "\n");
-//		bu.append(this.getAdress().getDescription());
+		// bu.append(this.getAdress().getDescription());
 		return bu.toString();
 	}
 
@@ -127,10 +188,73 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		return super.getName();
 	}
 
+	public String getQuestionName() {
+		return super.getName();
+	}
+
+	public void setQuestionName(String questionName) {
+		this.setName(questionName);
+	}
+
 	@Override
-	public int getSolutionCount() {
-		return Question.getCourseCount(this);
+	public int getQuestionCount() {
+		return Question.getQuestionCount(this);
+	}
+
+	public int getNumber() {
+		return number;
+	}
+
+	public void setNumber(int number) {
+		this.number = number;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public String getQuestionText() {
+		return questionText;
+	}
+
+	public void setQuestionText(String questionText) {
+		this.questionText = questionText;
+	}
+
+	public Image getQuestionImage() {
+		return questionImage;
+	}
+
+	public void setQuestionImage(Image questionImage) {
+		this.questionImage = questionImage;
+	}
+
+	public String getQuestionFooter() {
+		return questionFooter;
+	}
+
+	public void setQuestionFooter(String questionFooter) {
+		this.questionFooter = questionFooter;
+	}
+
+	public String getAnswerExpailnation() {
+		return answerExpailnation;
+	}
+
+	public void setAnswerExpailnation(String answerExpailnation) {
+		this.answerExpailnation = answerExpailnation;
+	}
+
+	public int getImageLine() {
+		return imageLine;
+	}
+
+	public void setImageLine(int imageLine) {
+		this.imageLine = imageLine;
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
-
 }

@@ -52,8 +52,8 @@ public abstract class DaoSchoolAbstract {
 
 	public abstract boolean deleteElement(ExamItemAbstract schoolItemAbstract);
 
-	private boolean unsavedTeacher(ExamItemAbstract seed) {
-		for (IQuestion teacher : Question.getTeachers()) {
+	private boolean unsavedQuestion(ExamItemAbstract seed) {
+		for (IQuestion teacher : Question.getQuestions()) {
 			if (!((ExamItemAbstract) teacher).isSaved()) {
 				if (!((ExamItemAbstract) teacher).equals(seed)) {
 					return true;
@@ -63,8 +63,8 @@ public abstract class DaoSchoolAbstract {
 		return false;
 	}
 
-	private boolean unsavedStudent(ExamItemAbstract seed) {
-		for (IAnswer student : Answer.getStudents()) {
+	private boolean unsavedAnswer(ExamItemAbstract seed) {
+		for (IAnswer student : Answer.getAnswers()) {
 			if (!((ExamItemAbstract) student).isSaved()) {
 				if (!((ExamItemAbstract) student).equals(seed)) {
 					return true;
@@ -74,8 +74,8 @@ public abstract class DaoSchoolAbstract {
 		return false;
 	}
 
-	private boolean unsavedCourse(ExamItemAbstract seed) {
-		for (ISolution course : Solution.getCourses()) {
+	private boolean unsavedExam(ExamItemAbstract seed) {
+		for (IQuestion course : Question.getQuestions()) {
 			if (!((ExamItemAbstract) course).isSaved()) {
 				if (!((ExamItemAbstract) course).equals(seed)) {
 					return true;
@@ -86,13 +86,13 @@ public abstract class DaoSchoolAbstract {
 	}
 
 	private void unset() {
-		for (ISolution course : Solution.getCourses()) {
+		for (IQuestion course : Question.getQuestions()) {
 			((ExamItemAbstract) course).setSaved(false);
 		}
-		for (IQuestion teacher : Question.getTeachers()) {
+		for (IQuestion teacher : Question.getQuestions()) {
 			((ExamItemAbstract) teacher).setSaved(false);
 		}
-		for (IAnswer student : Answer.getStudents()) {
+		for (IAnswer student : Answer.getAnswers()) {
 			((ExamItemAbstract) student).setSaved(false);
 		}
 	}
@@ -101,24 +101,24 @@ public abstract class DaoSchoolAbstract {
 		boolean ret = false;
 		for (IQuestion t : ExamenVerwaltung.getQuestionList()) {
 			if (!(((ExamItemAbstract) t).isSaved())) {
-				if (!unsavedTeacher((ExamItemAbstract) t) && !unsavedStudent((ExamItemAbstract) t)) {
+				if (!unsavedQuestion((ExamItemAbstract) t) && !unsavedAnswer((ExamItemAbstract) t)) {
 					((ExamItemAbstract) t).setLast(true);
 				}
 				ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao())
 						.saveElement((ExamItemAbstract) t);
 			}
 		}
-		for (int index = 0; index < Solution.getCourses().size(); index++) {
-			ISolution c = Solution.getCourses().get(index);
-			if (!unsavedTeacher((ExamItemAbstract) c) && !unsavedCourse((ExamItemAbstract) c)
-					&& !unsavedStudent((ExamItemAbstract) c)) {
+		for (int index = 0; index < Question.getQuestions().size(); index++) {
+			IQuestion c = Question.getQuestions().get(index);
+			if (!unsavedQuestion((ExamItemAbstract) c) && !unsavedExam((ExamItemAbstract) c)
+					&& !unsavedAnswer((ExamItemAbstract) c)) {
 				((ExamItemAbstract) c).setLast(true);
 			}
 			ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao()).saveElement((ExamItemAbstract) c);
 		}
-		for (IAnswer s : ExamenVerwaltung.getStudentList()) {
+		for (IAnswer s : ExamenVerwaltung.getAnswerList()) {
 			if (!((ExamItemAbstract) s).isSaved()) {
-				if (!unsavedStudent((ExamItemAbstract) s)) {
+				if (!unsavedAnswer((ExamItemAbstract) s)) {
 					((ExamItemAbstract) s).setLast(true);
 				}
 				ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao())
@@ -131,49 +131,51 @@ public abstract class DaoSchoolAbstract {
 
 	public boolean saveAll() {
 		boolean ret = false;
-		for (int index = 0; index < Solution.getCourses().size(); index++) {
-			ISolution c = Solution.getCourses().get(index);
-			if (!unsavedTeacher((ExamItemAbstract) c) && !unsavedCourse((ExamItemAbstract) c)
-					&& !unsavedStudent((ExamItemAbstract) c)) {
-				((ExamItemAbstract) c).setLast(true);
+		for (int index = 0; index < Question.getQuestions().size(); index++) {
+			IExam e = Exam.getExams().get(index);
+			if (!unsavedQuestion((ExamItemAbstract) e) && !unsavedExam((ExamItemAbstract) e)
+					&& !unsavedAnswer((ExamItemAbstract) e)) {
+				((ExamItemAbstract) e).setLast(true);
 			}
-			ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao()).saveElement((ExamItemAbstract) c);
-			if (c.hasQuestion()) {
-				if (!unsavedTeacher((ExamItemAbstract) c.getQuestion())
-						&& !unsavedCourse((ExamItemAbstract) c.getQuestion())
-						&& !unsavedStudent((ExamItemAbstract) c.getQuestion())) {
-					((ExamItemAbstract) c.getQuestion()).setLast(true);
-				}
-				ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao())
-						.saveElement((ExamItemAbstract) c.getQuestion());
-			}
-			if (c.hasAnswers()) {
-				for (IAnswer s : c.getAnswers()) {
-					if (!unsavedTeacher((ExamItemAbstract) s) && !unsavedCourse((ExamItemAbstract) s)
-							&& !unsavedStudent((ExamItemAbstract) s)) {
-						((ExamItemAbstract) s).setLast(true);
+			ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao()).saveElement((ExamItemAbstract) e);
+			if (e.hasQuestions()) {
+				for (IQuestion q : e.getQuestions()) {
+					if (!unsavedQuestion((ExamItemAbstract) q) && !unsavedExam((ExamItemAbstract) q)
+							&& !unsavedAnswer((ExamItemAbstract) q)) {
+						((ExamItemAbstract) q).setLast(true);
 					}
 					ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao())
-							.saveElement((ExamItemAbstract) s);
+							.saveElement((ExamItemAbstract) q);
+
+					if (q.hasAnswers()) {
+						for (IAnswer a : q.getAnswers()) {
+							if (!unsavedQuestion((ExamItemAbstract) a) && !unsavedExam((ExamItemAbstract) a)
+									&& !unsavedAnswer((ExamItemAbstract) a)) {
+								((ExamItemAbstract) a).setLast(true);
+							}
+							ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao())
+									.saveElement((ExamItemAbstract) a);
+						}
+					}
 				}
 			}
 		}
-		for (IQuestion t : ExamenVerwaltung.getQuestionList()) {
-			if (!(((ExamItemAbstract) t).isSaved())) {
-				if (!unsavedTeacher((ExamItemAbstract) t) && !unsavedStudent((ExamItemAbstract) t)) {
-					((ExamItemAbstract) t).setLast(true);
+		for (IQuestion qunsaved : ExamenVerwaltung.getQuestionList()) {
+			if (!(((ExamItemAbstract) qunsaved).isSaved())) {
+				if (!unsavedQuestion((ExamItemAbstract) qunsaved) && !unsavedAnswer((ExamItemAbstract) qunsaved)) {
+					((ExamItemAbstract) qunsaved).setLast(true);
 				}
 				ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao())
-						.saveElement((ExamItemAbstract) t);
+						.saveElement((ExamItemAbstract) qunsaved);
 			}
 		}
-		for (IAnswer s : ExamenVerwaltung.getStudentList()) {
-			if (!((ExamItemAbstract) s).isSaved()) {
-				if (!unsavedStudent((ExamItemAbstract) s)) {
-					((ExamItemAbstract) s).setLast(true);
+		for (IAnswer aunsaved : ExamenVerwaltung.getAnswerList()) {
+			if (!((ExamItemAbstract) aunsaved).isSaved()) {
+				if (!unsavedAnswer((ExamItemAbstract) aunsaved)) {
+					((ExamItemAbstract) aunsaved).setLast(true);
 				}
 				ret &= DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao())
-						.saveElement((ExamItemAbstract) s);
+						.saveElement((ExamItemAbstract) aunsaved);
 			}
 		}
 		unset();

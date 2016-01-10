@@ -87,7 +87,7 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 				}
 			}
 		}
-		if (schoolItemAbstract instanceof ISolution) {
+		if (schoolItemAbstract instanceof IQuestion) {
 			cc++;
 		} else if (schoolItemAbstract instanceof IQuestion) {
 			ct++;
@@ -133,10 +133,10 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 				System.out.println(((Question) schoolItemAbstract).toString());
 				ct++;
 			}
-			if (schoolItemAbstract instanceof Solution) {
-				Solution course = (Solution) schoolItemAbstract;
+			if (schoolItemAbstract instanceof Question) {
+				Question course = (Question) schoolItemAbstract;
 				System.out.println(course.toString());
-				Solution.load(course);
+				Question.load(course);
 				cc++;
 			}
 			// if (course.hasTeacher()) {

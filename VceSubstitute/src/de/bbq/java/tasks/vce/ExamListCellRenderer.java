@@ -10,7 +10,7 @@ import javax.swing.JList;
  * @author Thorsten2201
  *
  */
-public class SchoolListCellRenderer extends DefaultListCellRenderer {
+public class ExamListCellRenderer extends DefaultListCellRenderer {
 	private static final long serialVersionUID = 1L;
 
 	@Override

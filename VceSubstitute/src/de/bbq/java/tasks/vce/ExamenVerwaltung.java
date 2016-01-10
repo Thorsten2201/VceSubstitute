@@ -2,6 +2,7 @@ package de.bbq.java.tasks.vce;
 
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -10,7 +11,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import java.awt.Dimension;
-import java.awt.GridLayout;
 //import java.awt.Image;
 //import java.awt.Toolkit;
 import java.awt.event.ActionListener;
@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * @author Thorsten2201
@@ -43,9 +44,13 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	private static Shell shell;
 	private static DateFormat dateFormatGermany;
 
-	private PanelQuestion panelQuestion;
-	private PanelExam panelExam;
-	private PanelAnswer panelAnswer;
+	private static PanelQuestion panelQuestion;
+	private static PanelExam panelExam;
+	private static PanelAnswer panelAnswer;
+	private PanelMenu panelMenu;
+	private static ResourceBundle currentBundle;
+	private static Locale currentLocale;
+
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	public static EDaoSchool getSelectedDao() {
@@ -54,7 +59,6 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 
 	public static void setSelectedDao(EDaoSchool selectedDao) {
 		ExamenVerwaltung.selectedDao = selectedDao;
-		Solution.dataAccessObject = DaoSchoolAbstract.getDaoSchool(selectedDao);
 		Question.dataAccessObject = DaoSchoolAbstract.getDaoSchool(selectedDao);
 		Answer.dataAccessObject = DaoSchoolAbstract.getDaoSchool(selectedDao);
 	}
@@ -63,6 +67,13 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	// Construct
 	public static void main(String[] args) {
 		console = false;
+		// Locale currentLocale = Locale.getDefault();
+		// TODO!!!:
+		currentLocale = new Locale("en", "US");
+		// currentBundle = ResourceBundle.getBundle("LanguageBundle");
+		currentBundle = ResourceBundle.getBundle("LanguageBundle", currentLocale);
+		System.out.println(currentBundle.getString("Welcome"));
+
 		if (getGermanDate() == null) {
 			Locale locDE = new Locale(Locale.GERMANY.getCountry());
 			setDateFormatGermany(DateFormat.getDateInstance(DateFormat.FULL, locDE));
@@ -72,10 +83,14 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		String osname = System.getProperty("os.name");
 
 		if (!(osname.regionMatches(true, 0, "Windows", 0, 7))) {
-			System.out.println(
-					"Was ist das denn für ein Dreck, wo ist meine Windows API hin?\nNa da darfst du jetzt schön tippen mein Freund, klicken is nicht.\r\n");
+			System.out.println(currentBundle.getString("ps.linux"));
+			// System.out.println(
+			// "Was ist das denn für ein Dreck, wo ist meine Windows API
+			// hin?\nNa da darfst du jetzt schön tippen mein Freund, klicken is
+			// nicht.\r\n");
 			console = true;
 		} else if (args.length > 0) {
+			// TODO: LANGUAGE
 			if (args[0].equalsIgnoreCase("DEBUG")) {
 				System.out.println("<Rebug-Mode>");
 				console = true;
@@ -83,25 +98,23 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 			} else {
 				console = true;
 				String out = "";
-				String add = "hat er";
-				String it = "er steht";
-				String param = "deinen";
+//				String add = "hat er";
+//				String it = "er steht";
+				String it = getText("no.use/s");
+				String param = getText("your/s");
 				for (int index = 0; index < args.length; index++) {
 					if (index != args.length - 1 && index > 0) {
 						out += ", ";
-						add = "haben sie";
-						it = "sie stehen";
-						param = "deine";
 					} else if (index == args.length - 1) {
 						out += " und ";
-						add = "haben sie";
-						it = "sie stehen";
-						param = "deine";
 					}
+//					add = "haben sie";
+//					it = "sie stehen";
+					param = getText("your/m");
 					out += args[index];
+					it = getText("no.use/m");
 				}
-				System.out.println("Vielen Dank für " + param + " Parameter " + out + ",\ngebracht " + add
-						+ " dir nichts, aber dafür " + it + " jetzt da wo früher mal deine GUI gestanden hat.");
+				System.out.println(getText("thank.you.for") + " " + param + " Parameter " + out + ",\n" + it);
 				System.out.println();
 				launcher.setVisible(false);
 			}
@@ -116,7 +129,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		}
 	}
 
-	private void refresh() {
+	protected static void refresh() {
 		panelQuestion.refresh();
 		panelExam.refresh();
 		panelAnswer.refresh();
@@ -128,10 +141,11 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 			public void run() {
 				ExamenVerwaltung.getInstance().closeConnections();
 				System.exit(0);
+				Runtime.getRuntime().halt(0);
 			}
 		});
 		// Image icon = Toolkit.getDefaultToolkit().getImage("form.gif");
-		setTitle("Schulverwaltung");
+		setTitle(ExamenVerwaltung.getText("title"));
 		setSize(winLength, winHight);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -150,18 +164,20 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	@SuppressWarnings("static-access")
 	public static void showErrorMessage(String s) {
 		if (console) {
-			getInstance().shell.showMessage("Error", s);
+			getInstance().shell.showMessage(ExamenVerwaltung.getText("Error"), s);
 		} else {
-			JOptionPane.showInternalMessageDialog(null, s, "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, s, ExamenVerwaltung.getText("Error"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	@SuppressWarnings("static-access")
 	public static String showInput(String s) {
+		String loc = ExamenVerwaltung.getText(s);
 		if (console) {
-			return getInstance().shell.showInput(s);
+			return getInstance().shell.showInput(loc);
 		} else {
-			return JOptionPane.showInternalInputDialog(null, s, "Information", JOptionPane.QUESTION_MESSAGE);
+			return JOptionPane.showInputDialog(null, loc, ExamenVerwaltung.getText("Information"),
+					JOptionPane.QUESTION_MESSAGE);
 		}
 	}
 
@@ -172,18 +188,25 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		} else {
 			// JOptionPane.showMessageDialog(null, s, "Information",
 			// JOptionPane.INFORMATION_MESSAGE);
-			JOptionPane.showInternalMessageDialog(null, s, "Information", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null, s, ExamenVerwaltung.getText("Information"),
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
 	@SuppressWarnings("static-access")
 	public static void showException(Exception e) {
 		if (console) {
-			getInstance().shell.showMessage("Exception", e.getMessage(), e.getStackTrace().toString());
+			getInstance().shell.showMessage(ExamenVerwaltung.getText("Exception"), e.getMessage(),
+					e.getStackTrace().toString());
 		} else {
-			JOptionPane.showInternalMessageDialog(null, e.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, e.getMessage(), ExamenVerwaltung.getText("Exception"),
+					JOptionPane.ERROR_MESSAGE);
 			System.out.println(e.getStackTrace());
 		}
+	}
+
+	public static String getText(String key) {
+		return currentBundle.getString(key);
 	}
 
 	protected void closeConnections() {
@@ -191,24 +214,28 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	}
 
 	private void addControls() {
-		this.setLayout(new GridLayout(1, 1));
+		this.setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
+		panelMenu = new PanelMenu();
+		panelMenu.setBorder(new EmptyBorder(5, 5, 5, 5));
+		panelMenu.setPreferredSize(new Dimension(410, 50));
+		add(panelMenu);
 
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		ImageIcon icon = createImageIcon("exam.jpg");
 
 		panelExam = new PanelExam();
-		tabbedPane.addTab("Examen", icon, panelExam, "Examen verwalten");
+		tabbedPane.addTab(getText("Exams"), icon, panelExam, getText("Manage.exams"));
 		tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
 		icon = createImageIcon("question.png");
 		panelQuestion = new PanelQuestion();
-		tabbedPane.addTab("Fragen", icon,panelQuestion , "Fragen verwalten");
+		tabbedPane.addTab(getText("Questions"), icon, panelQuestion,getText("Manage.questions"));
 		tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
 		icon = createImageIcon("exclamation.png");
 		panelAnswer = new PanelAnswer();
-		tabbedPane.addTab("Antworten", icon, panelAnswer, "Antworten verwalten");
+		tabbedPane.addTab(getText("Answers"), icon, panelAnswer,getText("Manage.answers"));
 		panelAnswer.setPreferredSize(new Dimension(410, 50));
 		tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
 
@@ -219,10 +246,10 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 				JTabbedPane source = (JTabbedPane) e.getSource();
 				switch (source.getSelectedIndex()) {
 				case 0:
-					panelQuestion.refresh();
+					panelExam.refresh();
 					break;
 				case 1:
-					panelExam.refresh();
+					panelQuestion.refresh();
 					break;
 				case 2:
 					panelAnswer.refresh();
@@ -245,7 +272,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		if (imgURL != null) {
 			return new ImageIcon(imgURL);
 		} else {
-			System.err.println("Datei nicht gefunden: " + path);
+			System.err.println(getText("file.not.found:") + " " + path);
 			return null;
 		}
 	}
@@ -283,7 +310,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 
 	public static void toggleFrame() {
 		launcher.setVisible(!launcher.isVisible());
-		launcher.refresh();
+		ExamenVerwaltung.refresh();
 	}
 
 	public static ExamenVerwaltung getInstance() {
@@ -292,7 +319,6 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 
 	public static void reset() {
 		ExamItemAbstract.highestMemberId = 1000;
-		Solution.reset();
 		Question.reset();
 		Answer.reset();
 	}
@@ -300,23 +326,23 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Class factories returning interfaces
-	public static ArrayList<ISolution> getSolutionList() {
-		return Solution.getCourses();
-	}
-
 	public static ArrayList<IQuestion> getQuestionList() {
-		return Question.getTeachers();
+		return Question.getQuestions();
 	}
 
-	public static ArrayList<IAnswer> getStudentList() {
-		return Answer.getStudents();
+	public static ArrayList<IAnswer> getAnswerList() {
+		return Answer.getAnswers();
 	}
 
-	public static ArrayList<ISolution> getCourses(IQuestion teacher) {
-		ArrayList<ISolution> ret = new ArrayList<>();
-		for (ISolution c : getSolutionList()) {
-			if (c.hasQuestion()) {
-				if (c.getQuestion().equals(teacher)) {
+	public static ArrayList<IExam> getExamList() {
+		return Exam.getExams();
+	}
+
+	public static ArrayList<IQuestion> getCourses(IQuestion teacher) {
+		ArrayList<IQuestion> ret = new ArrayList<>();
+		for (IQuestion c : getQuestionList()) {
+			if (c.hasExam()) {
+				if (c.getExam().equals(teacher)) {
 					ret.add(c);
 				}
 			}
@@ -324,12 +350,12 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		return ret;
 	}
 
-	public static ISolution getNewSolution(boolean random) {
-		return Solution.createSolution(true, selectedDao);
+	public static IQuestion getNewSolution(boolean random) {
+		return Question.createQuestion(true, selectedDao);
 	}
 
-	public static ISolution getNewSolution(String name) {
-		return Solution.createSolution(name, selectedDao);
+	public static IQuestion getNewSolution(String name) {
+		return Question.createQuestion(name, selectedDao);
 	}
 
 	public static IQuestion getNewQuestion(boolean random) {
@@ -340,12 +366,20 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		return Question.createQuestion(name, selectedDao);
 	}
 
-	public static IAnswer getNewStudent(boolean random) {
-		return Answer.createStudent(random, selectedDao);
+	public static IAnswer getNewAnswer(boolean random) {
+		return Answer.createAnwer(random, selectedDao);
 	}
 
 	public static IAnswer getNewStudent(String name) {
-		return Answer.createStudent(name, selectedDao);
+		return Answer.createAnswer(name, selectedDao);
+	}
+
+	public static Exam getNewExam(String name) {
+		return Exam.createExam(name, selectedDao);
+	}
+
+	public static Exam getNewExam(boolean random) {
+		return Exam.createExam(random, selectedDao);
 	}
 
 	/***
@@ -371,7 +405,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 					edited.toFront();
 					edited.repaint();
 					found = true;
-					System.out.println("reactivate");
+//					System.out.println("reactivate");
 				}
 			}
 		}
@@ -380,15 +414,15 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 				edit = new FrameEdit((IQuestion) editItem);
 			} else if (editItem.getClass() == Answer.class) {
 				edit = new FrameEdit((IAnswer) editItem);
-			} else if (editItem.getClass() == Solution.class) {
-				edit = new FrameEdit((ISolution) editItem);
+			} else if (editItem.getClass() == Question.class) {
+				edit = new FrameEdit((IQuestion) editItem);
 			}
 		}
 		if (edit != null) {
 			editItem.setInEdit(true);
 
 			edit.addWindowListener(ExamenVerwaltung.getInstance());
-			System.out.println("opened");
+//			System.out.println("opened");
 			editFrames.add(edit);
 		}
 	}
@@ -400,15 +434,11 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	public static boolean deleteElement(ExamItemAbstract loadItem) {
 		boolean ret = DaoSchoolAbstract.getDaoSchool(selectedDao).deleteElement(loadItem);
 		if (ret) {
-			if (loadItem instanceof ISolution) {
-				Solution.courseDeleted((ISolution) loadItem);
-			} else if (loadItem instanceof IQuestion) {
-				Question.teacherDeleted(loadItem);
-				Solution.teacherDeleted((IQuestion) loadItem);
+			if (loadItem instanceof IQuestion) {
+				Question.questionDeleted(loadItem);
 			} else if (loadItem instanceof IAnswer) {
 				Answer.answerDeleted((IAnswer) loadItem);
-				Solution.studentDeleted((IAnswer) loadItem);
-			} 
+			}
 		}
 		return ret;
 	}
@@ -429,7 +459,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	public void windowClosing(WindowEvent arg0) {
 		FrameEdit edit = (FrameEdit) arg0.getSource();
 		if (editFrames.contains(edit)) {
-			System.out.println("destory:" + edit.toString());
+//			System.out.println("destory: " + edit.toString());
 			editFrames.remove(edit);
 			edit = null;
 		}

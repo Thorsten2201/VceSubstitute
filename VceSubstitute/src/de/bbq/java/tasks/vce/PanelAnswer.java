@@ -30,85 +30,85 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Class Properties
 	private boolean refresh = true;
-	private IAnswer selectedStudent;
+	private IAnswer selectedAnswer;
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Controls
-	private JButton addStudentButton, deleteStudentButton, addCourseButton, removeCourseButton;
-	private JList<IAnswer> studentsJList;
-	private JList<ISolution> coursePoolJList, courseSelectedJList;
-	private DefaultListModel<IAnswer> studentListModel;
-	private DefaultListModel<ISolution> coursePoolListModel, courseSelectedListModel;
+	private JButton addAnswerButton, deleteAnswerButton, addQuestioneButton, removeQuestionButton;
+	private JList<IAnswer> answerJList;
+	private JList<IQuestion> questionPoolJList, questionSelectedJList;
+	private DefaultListModel<IAnswer> answerListModel;
+	private DefaultListModel<IQuestion> questionPoolListModel, questionSelectedListModel;
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Class methods
 	public void refresh() {
-		int selIndex = studentsJList.getSelectedIndex();
+		int selIndex = answerJList.getSelectedIndex();
 		this.refresh = true;
-		IAnswer student = null;
-		for (int index = this.studentListModel.getSize(); index > 0; index--) {
+		IAnswer answer = null;
+		for (int index = this.answerListModel.getSize(); index > 0; index--) {
 			try {
-				student = (IAnswer) this.studentListModel.getElementAt(index - 1);
+				answer = (IAnswer) this.answerListModel.getElementAt(index - 1);
 			} catch (Exception e) {
 				ExamenVerwaltung.showException(e);
 			}
-			if (!ExamenVerwaltung.getSolutionList().contains(student)) {
+			if (!ExamenVerwaltung.getQuestionList().contains(answer)) {
 				try {
-					this.studentListModel.remove(index - 1);
+					this.answerListModel.remove(index - 1);
 				} catch (Exception e) {
 					ExamenVerwaltung.showException(e);
 				}
 			}
 		}
-		for (IAnswer p : ExamenVerwaltung.getStudentList()) {
-			this.studentListModel.addElement(p);
+		for (IAnswer a : ExamenVerwaltung.getAnswerList()) {
+			this.answerListModel.addElement(a);
 		}
-		int poolIndex = coursePoolJList.getSelectedIndex();
-		this.coursePoolListModel.clear();
-		this.courseSelectedListModel.clear();
-		if (this.selectedStudent != null) {
-			for (ISolution c : ExamenVerwaltung.getSolutionList()) {
-				if (this.selectedStudent.hasSolution(c)) {
-					this.courseSelectedListModel.addElement(c);
+		int poolIndex = questionPoolJList.getSelectedIndex();
+		this.questionPoolListModel.clear();
+		this.questionSelectedListModel.clear();
+		if (this.selectedAnswer != null) {
+			for (IQuestion q : ExamenVerwaltung.getQuestionList()) {
+				if (this.selectedAnswer.hasQuestion(q)) {
+					this.questionSelectedListModel.addElement(q);
 				} else {
-					this.coursePoolListModel.addElement(c);
+					this.questionPoolListModel.addElement(q);
 				}
 			}
 		}
 		if (selIndex < 0) {
 			// do Nothing
-		} else if (selIndex < this.studentListModel.getSize()) {
-			this.studentsJList.setSelectedIndex(selIndex);
+		} else if (selIndex < this.answerListModel.getSize()) {
+			this.answerJList.setSelectedIndex(selIndex);
 		} else {
-			this.studentsJList.setSelectedIndex(this.studentListModel.getSize() - 1);
+			this.answerJList.setSelectedIndex(this.answerListModel.getSize() - 1);
 		}
 		if (poolIndex < 0) {
 			// do Nothing
-		} else if (poolIndex < this.coursePoolListModel.getSize()) {
-			this.coursePoolJList.setSelectedIndex(poolIndex);
+		} else if (poolIndex < this.questionPoolListModel.getSize()) {
+			this.questionPoolJList.setSelectedIndex(poolIndex);
 		} else {
-			this.coursePoolJList.setSelectedIndex(this.coursePoolListModel.getSize() - 1);
+			this.questionPoolJList.setSelectedIndex(this.questionPoolListModel.getSize() - 1);
 		}
 		checkButtons();
 		this.refresh = false;
 	}
 
 	public void checkButtons() {
-		this.deleteStudentButton.setEnabled(this.studentsJList.getModel().getSize() > 0);
-		if (this.courseSelectedJList.getSelectedIndex() < 0) {
-			if (this.courseSelectedJList.getModel().getSize() > 0) {
-				this.courseSelectedJList.setSelectedIndex(0);
+		this.deleteAnswerButton.setEnabled(this.answerJList.getModel().getSize() > 0);
+		if (this.questionSelectedJList.getSelectedIndex() < 0) {
+			if (this.questionSelectedJList.getModel().getSize() > 0) {
+				this.questionSelectedJList.setSelectedIndex(0);
 			}
 		}
-		if (this.coursePoolJList.getSelectedIndex() < 0) {
-			if (this.coursePoolJList.getModel().getSize() > 0) {
-				this.coursePoolJList.setSelectedIndex(0);
+		if (this.questionPoolJList.getSelectedIndex() < 0) {
+			if (this.questionPoolJList.getModel().getSize() > 0) {
+				this.questionPoolJList.setSelectedIndex(0);
 			}
 		}
-		this.removeCourseButton.setEnabled(this.courseSelectedJList.getModel().getSize() > 0);
-		this.addCourseButton.setEnabled(this.coursePoolJList.getModel().getSize() > 0);
+		this.removeQuestionButton.setEnabled(this.questionSelectedJList.getModel().getSize() > 0);
+		this.addQuestioneButton.setEnabled(this.questionPoolJList.getModel().getSize() > 0);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
@@ -117,17 +117,17 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		if (!this.refresh) {
-			if (e.getSource() == this.studentsJList) {
-				refreshStudents();
+			if (e.getSource() == this.answerJList) {
+				refreshAnswers();
 				checkButtons();
 			}
 		}
 	}
 
-	private void refreshStudents() {
-		IAnswer selStudent = (IAnswer) this.studentsJList.getSelectedValue();
-		if (selStudent != null) {
-			this.selectedStudent = selStudent;
+	private void refreshAnswers() {
+		IAnswer selAnswer = (IAnswer) this.answerJList.getSelectedValue();
+		if (selAnswer != null) {
+			this.selectedAnswer = selAnswer;
 			refresh();
 		}
 	}
@@ -138,33 +138,33 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		this.refresh = true;
-		int index = this.studentsJList.getSelectedIndex();
-		int indexPool = this.coursePoolJList.getSelectedIndex();
-		int indexSel = this.courseSelectedJList.getSelectedIndex();
-		if (arg0.getSource() == this.addStudentButton) {
-			ExamenVerwaltung.getNewStudent(true);
-			index = this.studentsJList.getModel().getSize();
-		} else if (arg0.getSource() == deleteStudentButton) {
-			if (this.selectedStudent == null || !ExamenVerwaltung.getStudentList().contains(this.selectedStudent)) {
-				studentsJList.setSelectedIndex(index);
-				this.selectedStudent = this.studentsJList.getSelectedValue();
+		int index = this.answerJList.getSelectedIndex();
+		int indexPool = this.questionPoolJList.getSelectedIndex();
+		int indexSel = this.questionSelectedJList.getSelectedIndex();
+		if (arg0.getSource() == this.addAnswerButton) {
+			ExamenVerwaltung.getNewAnswer(true);
+			index = this.answerJList.getModel().getSize();
+		} else if (arg0.getSource() == deleteAnswerButton) {
+			if (this.selectedAnswer == null || !ExamenVerwaltung.getAnswerList().contains(this.selectedAnswer)) {
+				answerJList.setSelectedIndex(index);
+				this.selectedAnswer = this.answerJList.getSelectedValue();
 			}
-			if (this.selectedStudent != null) {
-				ExamenVerwaltung.deleteElement((ExamItemAbstract) selectedStudent);
-				this.selectedStudent = null;
+			if (this.selectedAnswer != null) {
+				ExamenVerwaltung.deleteElement((ExamItemAbstract) selectedAnswer);
+				this.selectedAnswer = null;
 			}
-			if (index >= this.studentsJList.getModel().getSize() - 1) {
+			if (index >= this.answerJList.getModel().getSize() - 1) {
 				index--;
 			}
 		}
-		if (arg0.getSource() == this.addCourseButton) {
-			ISolution selectedCourse = (ISolution) this.coursePoolJList.getSelectedValue();
-			if (selectedCourse != null) {
-				if (this.selectedStudent != null) {
+		if (arg0.getSource() == this.addQuestioneButton) {
+			IQuestion selectedQuestion = (IQuestion) this.questionPoolJList.getSelectedValue();
+			if (selectedQuestion != null) {
+				if (this.selectedAnswer != null) {
 					try {
-						selectedCourse.addAnswer(this.selectedStudent);
-						indexSel = this.courseSelectedJList.getModel().getSize();
-						if (index < this.studentsJList.getModel().getSize() - 1) {
+						selectedQuestion.addAnswer(this.selectedAnswer);
+						indexSel = this.questionSelectedJList.getModel().getSize();
+						if (index < this.answerJList.getModel().getSize() - 1) {
 							index++;
 						} else {
 							index = 0;
@@ -174,14 +174,14 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 					}
 				}
 			}
-		} else if (arg0.getSource() == this.removeCourseButton) {
-			ISolution selectedCourse = (ISolution) this.courseSelectedJList.getSelectedValue();
-			if (selectedCourse != null) {
-				if (this.selectedStudent != null) {
-					if (this.selectedStudent.hasSolution(selectedCourse)) {
+		} else if (arg0.getSource() == this.removeQuestionButton) {
+			IQuestion selectedQuestion = (IQuestion) this.questionSelectedJList.getSelectedValue();
+			if (selectedQuestion != null) {
+				if (this.selectedAnswer != null) {
+					if (this.selectedAnswer.hasQuestion(selectedQuestion)) {
 						try {
-							selectedCourse.removeAnswer(this.selectedStudent);
-							if (indexSel >= this.courseSelectedJList.getModel().getSize()) {
+							selectedQuestion.removeAnswer(this.selectedAnswer);
+							if (indexSel >= this.questionSelectedJList.getModel().getSize()) {
 								indexSel--;
 							}
 							if (indexPool < 0) {
@@ -196,16 +196,16 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 		}
 		this.refresh = false;
 		refresh();
-		if (index <= this.studentsJList.getModel().getSize()) {
-			this.studentsJList.setSelectedIndex(index);
-			this.selectedStudent = this.studentsJList.getSelectedValue();
-			refreshStudents();
+		if (index <= this.answerJList.getModel().getSize()) {
+			this.answerJList.setSelectedIndex(index);
+			this.selectedAnswer = this.answerJList.getSelectedValue();
+			refreshAnswers();
 		}
-		if (indexPool <= this.coursePoolJList.getModel().getSize()) {
-			this.coursePoolJList.setSelectedIndex(indexPool);
+		if (indexPool <= this.questionPoolJList.getModel().getSize()) {
+			this.questionPoolJList.setSelectedIndex(indexPool);
 		}
-		if (indexSel <= this.courseSelectedJList.getModel().getSize()) {
-			this.courseSelectedJList.setSelectedIndex(indexSel);
+		if (indexSel <= this.questionSelectedJList.getModel().getSize()) {
+			this.questionSelectedJList.setSelectedIndex(indexSel);
 		}
 		checkButtons();
 	}
@@ -223,13 +223,13 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 		panelTop.add(panelCreate);
 		this.add(panelTop, BorderLayout.NORTH);
 
-		this.studentListModel = new DefaultListModel<>();
-		this.studentsJList = new JList<IAnswer>(this.studentListModel);
-		this.studentsJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		this.studentsJList.setLayoutOrientation(JList.VERTICAL);
-		this.studentsJList.setVisibleRowCount(-1);
-		this.studentsJList.addListSelectionListener(this);
-		this.studentsJList.addMouseListener(new MouseAdapter() {
+		this.answerListModel = new DefaultListModel<>();
+		this.answerJList = new JList<IAnswer>(this.answerListModel);
+		this.answerJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.answerJList.setLayoutOrientation(JList.VERTICAL);
+		this.answerJList.setVisibleRowCount(-1);
+		this.answerJList.addListSelectionListener(this);
+		this.answerJList.addMouseListener(new MouseAdapter() {
 			@SuppressWarnings("rawtypes")
 			public void mouseClicked(MouseEvent evt) {
 				JList list = (JList) evt.getSource();
@@ -242,46 +242,46 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) studentListModel.get(index));
+					ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) answerListModel.get(index));
 				}
 			}
 		});
 
-		this.studentsJList.setCellRenderer(new SchoolListCellRenderer());
-		JScrollPane pupScroller = new JScrollPane(this.studentsJList);
-		pupScroller.setPreferredSize(new Dimension(206, 300));
-		pupScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		pupScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		pupScroller.setViewportBorder(new LineBorder(Color.BLACK));
-		pupScroller.setBounds(5, 30, 205, 300);
+		this.answerJList.setCellRenderer(new ExamListCellRenderer());
+		JScrollPane answerScroller = new JScrollPane(this.answerJList);
+		answerScroller.setPreferredSize(new Dimension(206, 300));
+		answerScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		answerScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		answerScroller.setViewportBorder(new LineBorder(Color.BLACK));
+		answerScroller.setBounds(5, 30, 205, 300);
 		// this.add(pupScroller);
-		panelBottom.add(pupScroller);
+		panelBottom.add(answerScroller);
 
-		this.addStudentButton = ExamenVerwaltung.getButton("newPupil", 5, 5, 100, 20, this, "Hinzufügen",
+		this.addAnswerButton = ExamenVerwaltung.getButton("newPupil", 5, 5, 100, 20, this, ExamenVerwaltung.getText("New") + " " + ExamenVerwaltung.getText("answer"),
 				"Neuer Schüler");
-		this.deleteStudentButton = ExamenVerwaltung.getButton("delPupil", 110, 5, 100, 20, this, "Löschen",
+		this.deleteAnswerButton = ExamenVerwaltung.getButton("delPupil", 110, 5, 100, 20, this, ExamenVerwaltung.getText("Delete") + " " + ExamenVerwaltung.getText("answer"),
 				"Schüler löschen");
 		// this.add(this.deleteStudentButton);
 		// this.add(this.addStudentButton);
-		panelCreate.add(this.addStudentButton);
-		panelCreate.add(this.deleteStudentButton);
+		panelCreate.add(this.addAnswerButton);
+		panelCreate.add(this.deleteAnswerButton);
 
-		this.addCourseButton = ExamenVerwaltung.getButton("addCourse", 235, 5, 205, 20, this, "Hinzufügen ->",
+		this.addQuestioneButton = ExamenVerwaltung.getButton("addCourse", 235, 5, 205, 20, this, ExamenVerwaltung.getText("Add") + " ->",
 				"Kurs Hinzufügen");
 		// this.add(this.addCourseButton);
-		panelTop.add(this.addCourseButton);
+		panelTop.add(this.addQuestioneButton);
 
-		this.removeCourseButton = ExamenVerwaltung.getButton("remCourse", 470, 5, 205, 20, this, "<- Entfernen",
+		this.removeQuestionButton = ExamenVerwaltung.getButton("remCourse", 470, 5, 205, 20, this, "<- " + ExamenVerwaltung.getText("Remove"),
 				"Kurs Entfernen");
 		// this.add(this.removeCourseButton);
-		panelTop.add(this.removeCourseButton);
+		panelTop.add(this.removeQuestionButton);
 
-		this.coursePoolListModel = new DefaultListModel<>();
-		this.coursePoolJList = new JList<ISolution>(coursePoolListModel);
-		this.coursePoolJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		this.coursePoolJList.setLayoutOrientation(JList.VERTICAL);
-		this.coursePoolJList.setVisibleRowCount(-1);
-		this.coursePoolJList.addMouseListener(new MouseAdapter() {
+		this.questionPoolListModel = new DefaultListModel<>();
+		this.questionPoolJList = new JList<IQuestion>(questionPoolListModel);
+		this.questionPoolJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.questionPoolJList.setLayoutOrientation(JList.VERTICAL);
+		this.questionPoolJList.setVisibleRowCount(-1);
+		this.questionPoolJList.addMouseListener(new MouseAdapter() {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void mouseClicked(MouseEvent evt) {
 				JList list = (JList) evt.getSource();
@@ -294,13 +294,13 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) ((List<ISolution>) coursePoolJList).get(index));
+					ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) ((List<IQuestion>) questionPoolJList).get(index));
 					refresh();
 				}
 			}
 		});
 		
-		JScrollPane poolScroller = new JScrollPane(this.coursePoolJList);
+		JScrollPane poolScroller = new JScrollPane(this.questionPoolJList);
 		poolScroller.setPreferredSize(new Dimension(206, 300));
 		poolScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		poolScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -308,12 +308,12 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 		poolScroller.setBounds(235, 30, 205, 300);
 		// this.add(poolScroller);
 
-		this.courseSelectedListModel = new DefaultListModel<>();
-		this.courseSelectedJList = new JList<ISolution>(this.courseSelectedListModel);
-		this.courseSelectedJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		this.courseSelectedJList.setLayoutOrientation(JList.VERTICAL);
-		this.courseSelectedJList.setVisibleRowCount(-1);
-		this.courseSelectedJList.addMouseListener(new MouseAdapter() {
+		this.questionSelectedListModel = new DefaultListModel<>();
+		this.questionSelectedJList = new JList<IQuestion>(this.questionSelectedListModel);
+		this.questionSelectedJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.questionSelectedJList.setLayoutOrientation(JList.VERTICAL);
+		this.questionSelectedJList.setVisibleRowCount(-1);
+		this.questionSelectedJList.addMouseListener(new MouseAdapter() {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void mouseClicked(MouseEvent evt) {
 				JList list = (JList) evt.getSource();
@@ -326,13 +326,13 @@ public class PanelAnswer extends JPanel implements ActionListener, ListSelection
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) ((List<ISolution>) coursePoolJList).get(index));
+					ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) ((List<IQuestion>) questionPoolJList).get(index));
 					refresh();
 				}
 			}
 		});
 
-		JScrollPane tookScroller = new JScrollPane(this.courseSelectedJList);
+		JScrollPane tookScroller = new JScrollPane(this.questionSelectedJList);
 		tookScroller.setPreferredSize(new Dimension(206, 300));
 		tookScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		tookScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);

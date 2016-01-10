@@ -34,7 +34,7 @@ public class FrameEdit extends JFrame implements ActionListener, ComponentListen
 	private final int buttonWidth = 100;
 	private final int dateHeight = 26;
 
-	private Solution courseDF;
+	private Question courseDF;
 	private Question teacherDF;
 	private Answer studentDF;
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -326,10 +326,10 @@ public class FrameEdit extends JFrame implements ActionListener, ComponentListen
 		this.winHight = 318;
 		Construct();
 	}
-
-	FrameEdit(ISolution editItem) { // ),WindowListener windowListener) {
+//TODO:
+	void FrameEdit1(IQuestion editItem) { // ),WindowListener windowListener) {
 		// this.addWindowListener(windowListener);
-		this.courseDF = (Solution) editItem;
+		this.courseDF = (Question) editItem;
 		this.courseDF.setInEdit(true);
 		ExamenVerwaltung.verifyData(this.courseDF);
 		setTitle("Kurs editieren");

@@ -1,17 +1,35 @@
 package de.bbq.java.tasks.vce;
 
+import java.util.ArrayList;
+
 /**
  * @author Thorsten2201
  *
  */
 public interface IQuestion { 
 	String toString();
+	
+	String getQuestionName();
 
-	void addSolution(ISolution exam) throws Exception;
+	void addQuestion(IQuestion question);
 
-	void deleteSolution(ISolution exam);
+	void deleteQuestion(IQuestion question);
 
-	int getSolutionCount();
+	int getQuestionCount();
 
 	String getDescription();
+	
+	boolean hasAnswers();
+
+	IExam getExam();
+
+	boolean hasExam();
+
+	ArrayList<IAnswer> getAnswers();
+
+	void addAnswer(IAnswer answer);
+
+	void removeAnswer(IAnswer answer);
+
+	boolean hasAnswer(IAnswer answer);
 }

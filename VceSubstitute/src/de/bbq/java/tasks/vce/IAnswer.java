@@ -7,13 +7,11 @@ package de.bbq.java.tasks.vce;
 public interface IAnswer { // extends IDaoSchool {
 	String toString();
 
-	ISolution getSolution();
+	IQuestion getQuestion();
 
 	boolean hasQuestion();
 
 	boolean hasQuestion(IQuestion question);
-
-	boolean hasSolution(ISolution solution);
 		
 	// void removeCourse();
 	String getDescription();
