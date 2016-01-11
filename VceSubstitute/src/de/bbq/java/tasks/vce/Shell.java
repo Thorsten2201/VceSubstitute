@@ -181,10 +181,10 @@ public class Shell {
 					break;
 				case 2:
 					if (this.name.length() > 0) {
-						this.course = (Question) ExamenVerwaltung.getNewSolution(this.name.toString());
+						this.course = (Question) ExamenVerwaltung.getNewQuestion(this.name.toString());
 						setSelection(selection);
 					} else {
-						this.course = (Question) ExamenVerwaltung.getNewSolution(true);
+						this.course = (Question) ExamenVerwaltung.getNewQuestion(true);
 					}
 					setSelectedClass(EMainSections.QUESTION);
 					System.out.println(this.course.getQuestionName() + " angelegt.");
@@ -394,7 +394,7 @@ public class Shell {
 					break;
 				case 2:
 					if (this.name.length() > 0) {
-						this.student = (Answer) ExamenVerwaltung.getNewStudent(this.name.toString());
+						this.student = (Answer) ExamenVerwaltung.getNewAnswer(this.name.toString());
 						setSelection(selection);
 					} else {
 						this.student = (Answer) ExamenVerwaltung.getNewAnswer(true);

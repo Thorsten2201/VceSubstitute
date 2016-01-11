@@ -350,14 +350,6 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		return ret;
 	}
 
-	public static IQuestion getNewSolution(boolean random) {
-		return Question.createQuestion(true, selectedDao);
-	}
-
-	public static IQuestion getNewSolution(String name) {
-		return Question.createQuestion(name, selectedDao);
-	}
-
 	public static IQuestion getNewQuestion(boolean random) {
 		return Question.createQuestion(random, selectedDao);
 	}
@@ -370,10 +362,6 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		return Answer.createAnwer(random, selectedDao);
 	}
 
-	public static IAnswer getNewStudent(String name) {
-		return Answer.createAnswer(name, selectedDao);
-	}
-
 	public static Exam getNewExam(String name) {
 		return Exam.createExam(name, selectedDao);
 	}
@@ -382,6 +370,9 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		return Exam.createExam(random, selectedDao);
 	}
 
+	public static Answer getNewAnswer(String name) {
+		return Answer.createAnswer(name, selectedDao);
+	}
 	/***
 	 * Updates the data on the object from the data source, if possible
 	 * 

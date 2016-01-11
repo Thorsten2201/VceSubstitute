@@ -505,7 +505,7 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 								+ EXAM_TABLE + ";");
 				this.resultSet = preparedStatement.executeQuery();
 				while (this.resultSet.next()) {
-					ExamItemAbstract loadItem = (ExamItemAbstract) ExamenVerwaltung.getNewSolution(true);
+					ExamItemAbstract loadItem = (ExamItemAbstract) ExamenVerwaltung.getNewQuestion(true);
 					if (this.loadElement(loadItem)) {
 						cc++;
 					} else {
