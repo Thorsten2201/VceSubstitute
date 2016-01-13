@@ -18,7 +18,7 @@ public class Exam extends ExamItemAbstract implements IExam {
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Construct
-	private Exam(String name, EDaoSchool eDataAccess) throws Exception {
+	private Exam(String name, EDaoExam eDataAccess) throws Exception {
 		super(eDataAccess);
 		this.name = name;
 	}
@@ -42,7 +42,7 @@ public class Exam extends ExamItemAbstract implements IExam {
 		return array[randomNum];
 	}
 
-	public static Exam createExam(String name, EDaoSchool eDataAccess) {
+	public static Exam createExam(String name, EDaoExam eDataAccess) {
 		Exam exam = null;
 		try {
 			exam = new Exam(name, eDataAccess);
@@ -53,7 +53,7 @@ public class Exam extends ExamItemAbstract implements IExam {
 		return exam;
 	}
 
-	public static Exam createExam(boolean random, EDaoSchool eDataAccess) {
+	public static Exam createExam(boolean random, EDaoExam eDataAccess) {
 		String newName = Exam.generateNewName();
 		Exam newExam = null;
 		if (!random) {

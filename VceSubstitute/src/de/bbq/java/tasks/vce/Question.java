@@ -1,6 +1,7 @@
 package de.bbq.java.tasks.vce;
 
 import java.awt.Image;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
@@ -20,13 +21,13 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	private String questionText;
 	private Image questionImage;
 	private String questionFooter;
-	private String answerExpailnation;
+	private String answerExplanation;
 	private int imageLine;
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Construct
-	private Question(String name, EDaoSchool eDataAccess) throws Exception {
+	private Question(String name, EDaoExam eDataAccess) throws Exception {
 		super(eDataAccess);
 		super.setName(name);
 		this.number = allQuestions.size() + 1;
@@ -53,7 +54,7 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		return ExamenVerwaltung.getText("Question") + " " + (allQuestions.size() + 1);// :array[randomNum];
 	}
 
-	public static Question createQuestion(String firstName, EDaoSchool eDataAccess) {
+	public static Question createQuestion(String firstName, EDaoExam eDataAccess) {
 		Question teacher = null;
 		try {
 			teacher = new Question(firstName, eDataAccess);
@@ -64,7 +65,7 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		return teacher;
 	}
 
-	public static IQuestion createQuestion(boolean random, EDaoSchool eDataAccess) {
+	public static IQuestion createQuestion(boolean random, EDaoExam eDataAccess) {
 		String newName = Question.generateNewName();
 		Question newTeacher = null;
 		if (!random) {
@@ -241,12 +242,12 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		this.questionFooter = questionFooter;
 	}
 
-	public String getAnswerExpailnation() {
-		return answerExpailnation;
+	public String getAnswerExplanation() {
+		return answerExplanation;
 	}
 
 	public void setAnswerExpailnation(String answerExpailnation) {
-		this.answerExpailnation = answerExpailnation;
+		this.answerExplanation = answerExpailnation;
 	}
 
 	public int getImageLine() {
@@ -256,5 +257,16 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	public void setImageLine(int imageLine) {
 		this.imageLine = imageLine;
 	}
+	
+	public String getImageData() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public InputStream getImageStream() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	/////////////////////////////////////////////////////////////////////////////////////
+
 }

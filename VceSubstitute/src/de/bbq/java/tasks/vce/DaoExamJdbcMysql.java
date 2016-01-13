@@ -2,11 +2,13 @@ package de.bbq.java.tasks.vce;
 
 import java.awt.Frame;
 import java.awt.HeadlessException;
+import java.awt.Image;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLType;
 import java.sql.Savepoint;
 import java.sql.Types;
 import java.util.HashMap;
@@ -18,7 +20,7 @@ import com.mysql.jdbc.Statement;
  * @author Thorsten2201
  *
  */
-public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
+public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 	Connection connection;
 	final String DEFAULT_DATABASE = "localhost/jdbc";
 	final String DEFAULT_USERNAME = "root";
@@ -35,8 +37,8 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Construct
-	public DaoSchoolJdbcMysql() {
-		super(EDaoSchool.JDBC_MYSQL);
+	public DaoExamJdbcMysql() {
+		super(EDaoExam.JDBC_MYSQL);
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException e) {
@@ -48,38 +50,38 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// DaoSchoolAbstract properties
 	@Override
-	public boolean saveElement(ExamItemAbstract schoolItemAbstract) {
-		if (elementExists(schoolItemAbstract)) {
-			return updateElement(schoolItemAbstract);
+	public boolean saveElement(ExamItemAbstract examItemAbstract) {
+		if (elementExists(examItemAbstract)) {
+			return updateElement(examItemAbstract);
 		} else {
-			return insertElement(schoolItemAbstract);
+			return insertElement(examItemAbstract);
 		}
 	}
 
-	private boolean elementExists(ExamItemAbstract schoolItemAbstract) {
+	private boolean elementExists(ExamItemAbstract examItemAbstract) {
 		try {
 			PreparedStatement preparedStatement = null;
-			if (schoolItemAbstract instanceof IQuestion) {
+			if (examItemAbstract instanceof IExam) {
 				preparedStatement = this.getConnection()
 						.prepareStatement("SELECT `id` FROM " + EXAM_TABLE + " WHERE (`id` = ?);");
-				if (this.examIdsInv.containsKey(schoolItemAbstract.getId())) {
-					preparedStatement.setInt(1, this.examIdsInv.get(schoolItemAbstract.getId()));
+				if (this.examIdsInv.containsKey(examItemAbstract.getId())) {
+					preparedStatement.setInt(1, this.examIdsInv.get(examItemAbstract.getId()));
 				} else {
 					preparedStatement.setInt(1, -1);
 				}
-			} else if (schoolItemAbstract instanceof IQuestion) {
+			} else if (examItemAbstract instanceof IQuestion) {
 				preparedStatement = this.getConnection()
 						.prepareStatement("SELECT `id` FROM " + QUESTION_TABLE + " WHERE (`id` = ?);");
-				if (this.questionIds.containsKey(schoolItemAbstract.getId())) {
-					preparedStatement.setInt(1, this.questionIds.get(schoolItemAbstract.getId()));
+				if (this.questionIds.containsKey(examItemAbstract.getId())) {
+					preparedStatement.setInt(1, this.questionIds.get(examItemAbstract.getId()));
 				} else {
 					preparedStatement.setInt(1, -1);
 				}
-			} else if (schoolItemAbstract instanceof IAnswer) {
+			} else if (examItemAbstract instanceof IAnswer) {
 				preparedStatement = this.getConnection()
 						.prepareStatement("SELECT `id` FROM " + ANSWER_TABLE + " WHERE (`id` = ?);");
-				if (this.answerIds.containsKey(schoolItemAbstract.getId())) {
-					preparedStatement.setInt(1, this.answerIds.get(schoolItemAbstract.getId()));
+				if (this.answerIds.containsKey(examItemAbstract.getId())) {
+					preparedStatement.setInt(1, this.answerIds.get(examItemAbstract.getId()));
 				} else {
 					preparedStatement.setInt(1, -1);
 				}
@@ -92,109 +94,73 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 		}
 	}
 
-	private boolean updateElement(ExamItemAbstract schoolItemAbstract) {
+	private boolean updateElement(ExamItemAbstract examItemAbstract) {
 		try {
-			if (schoolItemAbstract instanceof IExam) {
-				Exam exam = (Exam) schoolItemAbstract;
-				String sql = "UPDATE " + EXAM_TABLE
-						+ " SET `examName` = ?, `examName` = ?, `language` = ?, `description` = ? WHERE `id` = ?;";
-				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-				// the course had to pass elementExists() to get here, so
-				// courseIdsInv contains the key
+			if (examItemAbstract instanceof IExam) {
+				Exam exam = (Exam) examItemAbstract;
 				int examId = 0;
 				if (this.examIdsInv.containsKey(((ExamItemAbstract) exam).getId())) {
 					examId = examIdsInv.get(((ExamItemAbstract) exam).getId());
 				}
+				String sql = "UPDATE " + EXAM_TABLE
+						+ " SET `examName` = ?, `language` = ?, `description` = ? WHERE `id` = ?;";
+				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+				// the exam had to pass elementExists() to get here, so
+				// examIdsInv contains the key
+				statement.setString(1, exam.getName());
+				statement.setString(2, exam.getLanguage());
+				statement.setString(3, exam.getDescription());
+				statement.setInt(4, examId);
 				for (IQuestion q : exam.getQuestions()) {
 					if (!this.questionIds.containsKey(((ExamItemAbstract) q).getId())) {
 						this.saveElement((ExamItemAbstract) q);
 					}
-					if (!this.questionIds.containsKey(((ExamItemAbstract) q).getId())) {
-						this.saveElement((ExamItemAbstract) q);
-					}
-					int questionId = questionIds.get(((ExamItemAbstract) q).getId());
-
-					//statement.setInt(1, questionId);
-					statement.setString(2, q.getQuestionName());
-					// if (course.getEndTime() == null) {
-					// statement.setNull(3, Types.DATE);
-					// } else {
-					// statement.setDate(3, new
-					// java.sql.Date(course.getEndTime().getTime()));
-					// }
-					statement.setString(4, exam.getLanguage());
-					// statement.setBoolean(5, course.getNeedsBeamer());
-					// statement.setString(6, course.getRoomNumber());
-					// if (course.getStartTime() == null) {
-					// statement.setNull(7, Types.DATE);
-					// } else {
-					// statement.setDate(7, new
-					// java.sql.Date(course.getStartTime().getTime()));
-					// }
-					// statement.setString(8, course.getTopic());
-					statement.setInt(9, examId);
 				}
 
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
-					throw new SQLException("Kurs aktualisieren fehlgeschlagen user failed, keine Reihen beeinflusst.");
+					throw new SQLException(ExamenVerwaltung.getText("save.failed"));
 				}
-			} else if (schoolItemAbstract instanceof IQuestion) {
-				Question teacher = (Question) schoolItemAbstract;
+			} else if (examItemAbstract instanceof IQuestion) {
+				Question question = (Question) examItemAbstract;
+				int questionId = questionIds.get(((ExamItemAbstract) question).getId());
 				String sql = "UPDATE " + QUESTION_TABLE
-						+ " SET `lastName` = ?,`firstName` = ?,`birthTime` = ?,`city` = ?, `country` = ?, `houseNumber` = ?, `streetName` = ?, `zipCode` = ? WHERE `id` = ?;";
+						+ " SET `number` = ?,`language` = ?,`questionText` = ?,`image` = ?, `footer` = ?, `explanation` = ?, `imageLine` = ? WHERE `id` = ?;";
 				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-				// TODO: statement.setString(1, teacher.getLastName());
-				// statement.setString(2, teacher.getFirstName());
-				// if (teacher.getBirthDate() == null) {
-				// statement.setNull(3, Types.DATE);
-				// } else {
-				// statement.setDate(3, new
-				// java.sql.Date(teacher.getBirthDate().getTime()));
-				// }
-				// statement.setString(4, teacher.getAdress().getCity());
-				// statement.setString(5, teacher.getAdress().getCountry());
-				// statement.setString(6, teacher.getAdress().getHouseNumber());
-				// statement.setString(7, teacher.getAdress().getStreetName());
-				// statement.setInt(8, teacher.getAdress().getZipCode());
-
-				// the teacher had to pass elementExists() to get here, so
-				// teacherIds contains the key
-				int teacherId = questionIds.get(((ExamItemAbstract) teacher).getId());
-				statement.setInt(9, teacherId);
+//				statement.setString(1, question.getQuestionName()); `name` = ?, 
+				statement.setInt(1, question.getNumber());
+				statement.setString(2, question.getLanguage());
+				statement.setString(3, question.getQuestionText());
+				//TODO: Image-Blob
+//				File blob = new File("/path/to/picture.png");
+//				FileInputStream in = new FileInputStream(blob);
+				statement.setBinaryStream(4, question.getImageStream()); 
+//				statement.setNull(4, java.sql.Types.BLOB);
+				statement.setString(5, question.getQuestionFooter());
+				statement.setString(6, question.getAnswerExplanation());
+				statement.setInt(7, question.getImageLine());
+				statement.setInt(8, questionId);
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
-					throw new SQLException("Leerer anlegen fehlgeschlagen, keine Reihen beeinflusst.");
+					throw new SQLException(ExamenVerwaltung.getText("save.failed"));
 				}
-			} else if (schoolItemAbstract instanceof IAnswer) {
-				Answer student = (Answer) schoolItemAbstract;
+			} else if (examItemAbstract instanceof IAnswer) {
+				Answer answer = (Answer) examItemAbstract;
 				String sql = "UPDATE " + ANSWER_TABLE
-						+ " SET `lastName` = ?,`firstName` = ?,`birthTime` = ?,`city` = ?, `country` = ?, `houseNumber` = ?, `streetName` = ?, `zipCode` = ? WHERE `id` = ?;";
+						+ " SET `index` = ?,`answerText` = ?,`position` = ?,`isTrue` = ? WHERE `id` = ?;";
 				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-				// TODO: statement.setString(1, student.getLastName());
-				// statement.setString(2, student.getFirstName());
-				// if (student.getBirthDate() == null) {
-				// statement.setNull(3, Types.DATE);
-				// } else {
-				// statement.setDate(3, new
-				// java.sql.Date(student.getBirthDate().getTime()));
-				// }
-				// statement.setString(4, student.getAdress().getCity());
-				// statement.setString(5, student.getAdress().getCountry());
-				// statement.setString(6, student.getAdress().getHouseNumber());
-				// statement.setString(7, student.getAdress().getStreetName());
-				// statement.setInt(8, student.getAdress().getZipCode());
-
+				statement.setString(1, answer.getIndex()); //index
+				statement.setString(2, answer.getAnswerText());
+				statement.setInt(3, answer.getPosition());
+				statement.setBoolean(4, answer.isTrue());
 				// the student had to pass elementExists() to get here, so
 				// studentIds contains the key
-				int studentId = answerIds.get(((ExamItemAbstract) student).getId());
-				statement.setInt(9, studentId);
+				int answerId = answerIds.get(((ExamItemAbstract) answer).getId());
+				statement.setInt(5, answerId);
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
-					throw new SQLException("Schüler anlegen fehlgeschlagen, keine Reihen beeinflusst.");
+					throw new SQLException(ExamenVerwaltung.getText("save.failed"));
 				}
 			}
 		} catch (SQLException e) {
@@ -222,23 +188,7 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 
 						statement.setInt(1, questionId);
 						statement.setString(2, q.getQuestionName());
-						// if (course.getEndTime() == null) {
-						// statement.setNull(3, Types.DATE);
-						// } else {
-						// statement.setDate(3, new
-						// java.sql.Date(course.getEndTime().getTime()));
-						// }
 						statement.setString(4, q.getLanguage());
-						// statement.setBoolean(5, course.getNeedsBeamer());
-						// statement.setString(6, course.getRoomNumber());
-						// if (course.getStartTime() == null) {
-						// statement.setNull(7, Types.DATE);
-						// } else {
-						// statement.setDate(7, new
-						// java.sql.Date(course.getStartTime().getTime()));
-						// }
-						// statement.setString(8, course.getTopic());
-
 						int affectedRows = statement.executeUpdate();
 						if (affectedRows == 0) {
 							throw new SQLException(ExamenVerwaltung.getText("create.exam.failed.no.rows"));
@@ -253,73 +203,58 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 					}
 				}
 			} else if (schoolItemAbstract instanceof IQuestion) {
-				Question teacher = (Question) schoolItemAbstract;
+				Question question = (Question) schoolItemAbstract;
 				String sql = "INSERT INTO " + QUESTION_TABLE
-						+ " (`lastName`,`firstName`,`birthTime`,`city`, `country`, `houseNumber`, `streetName`, `zipCode`) VALUES(?, ?, ?, ?, ?, ?, ?, ?);";
+						+ " (`number`,`language`,`questionText`,`image`, `footer`, `explanation`, `imageLine`) VALUES(?, ?, ?, ?, ?, ?, ?);";
 				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-				// TODO: statement.setString(1, teacher.getLastName());
-				// statement.setString(2, teacher.getFirstName());
-				// if (teacher.getBirthDate() == null) {
-				// statement.setNull(3, Types.DATE);
-				// } else {
-				// statement.setDate(3, new
-				// java.sql.Date((teacher.getBirthDate().getTime())));
-				// }
-				// statement.setString(4, teacher.getAdress().getCity());
-				// statement.setString(5, teacher.getAdress().getCountry());
-				// statement.setString(6, teacher.getAdress().getHouseNumber());
-				// statement.setString(7, teacher.getAdress().getStreetName());
-				// statement.setInt(8, teacher.getAdress().getZipCode());
+				statement.setInt(1, question.getNumber());
+				statement.setString(2, question.getLanguage());
+				statement.setString(3, question.getQuestionText());
+				statement.setBinaryStream(3, question.getImageStream());
+				statement.setString(5, question.getQuestionFooter());
+				statement.setString(6, question.getAnswerExplanation());
+				statement.setInt(7, question.getImageLine());
 
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
-					throw new SQLException("Leerer anlegen fehlgeschlagen, keine Reihen beeinflusst.");
+					throw new SQLException(ExamenVerwaltung.getText("create.question.failed.no.rows"));
 				}
 				try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
 					if (generatedKeys.next()) {
 						questionIds.put(schoolItemAbstract.getId(), generatedKeys.getInt(1));
 					} else {
-						throw new SQLException("Leerer anlegen fehlgeschlagen, keine ID bekommen.");
+						throw new SQLException(ExamenVerwaltung.getText("create.question.failed.no.id"));
 					}
 				}
 			} else if (schoolItemAbstract instanceof IAnswer) {
-				Answer student = (Answer) schoolItemAbstract;
+				Answer answer = (Answer) schoolItemAbstract;
 				String sql = "INSERT INTO " + ANSWER_TABLE
 						+ " (`courseId`,`lastName`,`firstName`,`birthTime`,`city`, `country`, `houseNumber`, `streetName`, `zipCode`) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);";
 				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-				int courseId = 0;
-				if (student.hasQuestion()) {
-					if (!this.examIdsInv.containsKey(((ExamItemAbstract) student.getQuestion()).getId())) {
-						this.saveElement((ExamItemAbstract) student.getQuestion());
+				int answerId = 0;
+				if (answer.hasQuestion()) {
+					if (!this.examIdsInv.containsKey(((ExamItemAbstract) answer.getQuestion()).getId())) {
+						this.saveElement((ExamItemAbstract) answer.getQuestion());
 					}
-					courseId = this.examIdsInv.get(((ExamItemAbstract) student.getQuestion()).getId());
+					answerId = this.examIdsInv.get(((ExamItemAbstract) answer.getQuestion()).getId());
 				}
-				statement.setInt(1, courseId);
-				// TODO: statement.setString(2, student.getLastName());
-				// statement.setString(3, student.getFirstName());
-				// if (student.getBirthDate() == null) {
-				// statement.setNull(4, Types.DATE);
-				// } else {
-				// statement.setDate(4, new
-				// java.sql.Date(student.getBirthDate().getTime()));
-				// }
-				// statement.setString(5, student.getAdress().getCity());
-				// statement.setString(6, student.getAdress().getCountry());
-				// statement.setString(7, student.getAdress().getHouseNumber());
-				// statement.setString(8, student.getAdress().getStreetName());
-				// statement.setInt(9, student.getAdress().getZipCode());
+				statement.setInt(1, answerId);
+				statement.setString(2, answer.getIndex());
+				statement.setString(3, answer.getAnswerText());
+				statement.setBoolean(4, answer.isTrue());
+				statement.setInt(5, answer.getPosition());
 
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
-					throw new SQLException("Leerer anlegen fehlgeschlagen, keine Reihen beeinflusst.");
+					throw new SQLException(ExamenVerwaltung.getText("create.answer.failed.no.rows"));
 				}
 				try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
 					if (generatedKeys.next()) {
 						this.answerIds.put(schoolItemAbstract.getId(), generatedKeys.getInt(1));
 					} else {
-						throw new SQLException("Leerer anlegen fehlgeschlagen, keine ID bekommen.");
+						throw new SQLException(ExamenVerwaltung.getText("create.answer.failed.no.id"));
 					}
 				}
 			}
@@ -401,17 +336,16 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 	}
 
 	@Override
-	public boolean loadElement(ExamItemAbstract schoolItemAbstract) {
+	public boolean loadElement(ExamItemAbstract examItemAbstract) {
 		try {
-			if (schoolItemAbstract instanceof IQuestion) {
-				Question sqlCourse = (Question) schoolItemAbstract;
-				examIds.put(resultSet.getInt(1), sqlCourse.getId());
-				examIdsInv.put(sqlCourse.getId(), resultSet.getInt(1));
-				int sqlTeacherId = resultSet.getInt(2);
-				sqlCourse.setQuestionName(resultSet.getString(3));
-				// sqlCourse.setEndTime(resultSet.getDate(4));
-				sqlCourse.setLanguage(resultSet.getString(5));
-				// sqlCourse.setNeedsBeamer(resultSet.getBoolean(6));
+			if (examItemAbstract instanceof IQuestion) {
+				Question sqlQuestion = (Question) examItemAbstract;
+				examIds.put(resultSet.getInt(1), sqlQuestion.getId());
+				examIdsInv.put(sqlQuestion.getId(), resultSet.getInt(1));
+				int sqlQuestionId = resultSet.getInt(2);
+				sqlQuestion.setQuestionName(resultSet.getString(3));
+				sqlQuestion.setLanguage(resultSet.getString(5));
+				//TODO: sqlCourse.setNeedsBeamer(resultSet.getBoolean(6));
 				// sqlCourse.setRoomNumber(resultSet.getString(7));
 				// sqlCourse.setStartTime(resultSet.getDate(8));
 				// sqlCourse.setTopic(resultSet.getString(9));
@@ -427,9 +361,9 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 				// break;
 				// }
 				// }
-				return checkIds(sqlCourse, sqlTeacherId); // checkIds();
-			} else if (schoolItemAbstract instanceof IQuestion) {
-				Question sqlTeacher = (Question) schoolItemAbstract;
+				return checkIds(sqlQuestion, sqlQuestionId); // checkIds();
+			} else if (examItemAbstract instanceof IQuestion) {
+				Question sqlTeacher = (Question) examItemAbstract;
 				int teacherId = resultSet.getInt(1);
 				questionIds.put(sqlTeacher.getId(), teacherId);
 				// TODO: sqlTeacher.setLastName(resultSet.getString(2));
@@ -441,8 +375,8 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 				// sqlTeacher.getAdress().setStreetName(resultSet.getString(8));
 				// sqlTeacher.getAdress().setZipCode(resultSet.getInt(9));
 				return checkIds(sqlTeacher);
-			} else if (schoolItemAbstract instanceof IAnswer) {
-				Answer sqlStudent = (Answer) schoolItemAbstract;
+			} else if (examItemAbstract instanceof IAnswer) {
+				Answer sqlStudent = (Answer) examItemAbstract;
 				int studentId = resultSet.getInt(1);
 				int courseId = resultSet.getInt(2);
 				answerIds.put(sqlStudent.getId(), studentId);
@@ -695,16 +629,16 @@ public class DaoSchoolJdbcMysql extends DaoSchoolJdbcAbstract {
 
 		switch (table) {
 		case 0:
-			sql = "CREATE TABLE `course` (id INTEGER NOT NULL AUTO_INCREMENT, `teacherId` INTEGER, `courseName` VARCHAR(255),  `endTime` DATE, `language` VARCHAR(255), "
-					+ " `needsBeamer` BOOL,  `roomNumber` VARCHAR(255),  `startTime` DATE,  `topic` VARCHAR(255), primary key(id))";
+			sql = "CREATE TABLE `" + EXAM_TABLE + "` (id INTEGER NOT NULL AUTO_INCREMENT, `examName` NVARCHAR(255), `language` NVARCHAR(255), "
+					+ " `description` NVARCHAR(4096), primary key(id))";
 			break;
 		case 1:
-			sql = "CREATE TABLE `teacher` (id INTEGER NOT NULL AUTO_INCREMENT,  `lastName` VARCHAR(255), `firstName` VARCHAR(255), `birthTime` DATE, `city` VARCHAR(255), "
-					+ " `country` VARCHAR(255),  `houseNumber` VARCHAR(255),  `streetName` VARCHAR(255), `zipCode` INTEGER, primary key(id))";
+			sql = "CREATE TABLE `" + QUESTION_TABLE + "` (id INTEGER NOT NULL AUTO_INCREMENT, `number` INTEGER, `language` NVARCHAR(255), `questionText` TEXT, `image` BLOB, `footer` NVARCHAR(255), "
+					+ " `explanation` TEXT, `imageLine` INTEGER, primary key(id))";
 			break;
 		case 2:
-			sql = "CREATE TABLE `student` (id INTEGER NOT NULL AUTO_INCREMENT, `courseId` INTEGER, `lastName` VARCHAR(255), `firstName` VARCHAR(255), `birthTime` DATE, `city` VARCHAR(255), "
-					+ " `country` VARCHAR(255),  `houseNumber` VARCHAR(255),  `streetName` VARCHAR(255), `zipCode` INTEGER, primary key(id))";
+			sql = "CREATE TABLE `" + ANSWER_TABLE + "` (id INTEGER NOT NULL AUTO_INCREMENT, `index` NVARCHAR(1), `answerText` TEXT, "
+					+ " `isTrue` BOOL, `position` INTEGER, primary key(id))";
 			break;
 		}
 

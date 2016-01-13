@@ -37,7 +37,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	private static final int winHight = 430;
 	private static final int workStart = 7;
 	private static final int workEnd = 17;
-	private static EDaoSchool selectedDao = EDaoSchool.FILE;
+	private static EDaoExam selectedDao = EDaoExam.FILE;
 	private static ExamenVerwaltung launcher;
 	private static ArrayList<FrameEdit> editFrames = new ArrayList<>();
 	private static boolean console = false;
@@ -53,14 +53,14 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 
 	/////////////////////////////////////////////////////////////////////////////////////
 
-	public static EDaoSchool getSelectedDao() {
+	public static EDaoExam getSelectedDao() {
 		return selectedDao;
 	}
 
-	public static void setSelectedDao(EDaoSchool selectedDao) {
+	public static void setSelectedDao(EDaoExam selectedDao) {
 		ExamenVerwaltung.selectedDao = selectedDao;
-		Question.dataAccessObject = DaoSchoolAbstract.getDaoSchool(selectedDao);
-		Answer.dataAccessObject = DaoSchoolAbstract.getDaoSchool(selectedDao);
+		Question.dataAccessObject = DaoExamAbstract.getDaoExam(selectedDao);
+		Answer.dataAccessObject = DaoExamAbstract.getDaoExam(selectedDao);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +210,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	}
 
 	protected void closeConnections() {
-		DaoSchoolAbstract.closeConnections();
+		DaoExamAbstract.closeConnections();
 	}
 
 	private void addControls() {
@@ -379,11 +379,11 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	 * @param schoolItemAbstract
 	 */
 	public static void verifyData(ExamItemAbstract schoolItemAbstract) {
-		DaoSchoolAbstract.getDaoSchool(getSelectedDao()).loadElement(schoolItemAbstract);
+		DaoExamAbstract.getDaoExam(getSelectedDao()).loadElement(schoolItemAbstract);
 	}
 
 	public static void saveItem(ExamItemAbstract schoolItemAbstract) {
-		DaoSchoolAbstract.getDaoSchool(getSelectedDao()).saveElement(schoolItemAbstract);
+		DaoExamAbstract.getDaoExam(getSelectedDao()).saveElement(schoolItemAbstract);
 	}
 
 	public void editItem(ExamItemAbstract editItem) {
@@ -423,7 +423,7 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 	}
 
 	public static boolean deleteElement(ExamItemAbstract loadItem) {
-		boolean ret = DaoSchoolAbstract.getDaoSchool(selectedDao).deleteElement(loadItem);
+		boolean ret = DaoExamAbstract.getDaoExam(selectedDao).deleteElement(loadItem);
 		if (ret) {
 			if (loadItem instanceof IQuestion) {
 				Question.questionDeleted(loadItem);

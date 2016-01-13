@@ -16,13 +16,14 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Properties to serialize
 	private char index;
-	private String AnswerText;
+	private String answerText;
 	private boolean isTrue;
+	private int position;
 	/////////////////////////////////////////////////////////////////////////////////////
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Construct
-	private Answer(String name, EDaoSchool eDataAccess) throws Exception {
+	private Answer(String name, EDaoExam eDataAccess) throws Exception {
 		super(eDataAccess);
 		super.setName(name);
 	}
@@ -47,7 +48,7 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 		return ExamenVerwaltung.getText("Answer") + " " + (allAnswers.size() + 1); // array[randomNum];
 	}
 
-	public static Answer createAnswer(String name, EDaoSchool eDataAccess) {
+	public static Answer createAnswer(String name, EDaoExam eDataAccess) {
 		Answer answer = null;
 		try {
 			answer = new Answer(name, eDataAccess);
@@ -58,7 +59,7 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 		return answer;
 	}
 
-	public static Answer createAnwer(boolean random, EDaoSchool eDataAccess) {
+	public static Answer createAnwer(boolean random, EDaoExam eDataAccess) {
 		String newName = Answer.generateNewName();
 		Answer newAnswer = null;
 		if (!random) {
@@ -82,7 +83,6 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 		allAnswers = new ArrayList<>();
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
-
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Getter / Setter IStudent
@@ -126,6 +126,38 @@ public class Answer extends ExamItemAbstract implements IAnswer {
 			return false;
 		}
 		
+	}
+	
+	public String getIndex() {
+		return String.valueOf(index);
+	}
+
+	public void setIndex(char index) {
+		this.index = index;
+	}
+
+	public String getAnswerText() {
+		return answerText;
+	}
+
+	public void setAnswerText(String answerText) {
+		this.answerText = answerText;
+	}
+
+	public boolean isTrue() {
+		return isTrue;
+	}
+
+	public void setTrue(boolean isTrue) {
+		this.isTrue = isTrue;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 }

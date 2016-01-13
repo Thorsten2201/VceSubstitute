@@ -52,10 +52,10 @@ public class PanelMenu extends JPanel implements ActionListener, ChangeListener{
 		this.dataBase.setValue(0);
 		Hashtable<Integer, JLabel> ht = new Hashtable<Integer, JLabel>();
 
-		JLabel label = new JLabel(EDaoSchool.FILE.toString()); // new
+		JLabel label = new JLabel(EDaoExam.FILE.toString()); // new
 																// JLabel("Filesystem");
 		ht.put(0, label);
-		label = new JLabel(EDaoSchool.JDBC_MYSQL.toString()); // new
+		label = new JLabel(EDaoExam.JDBC_MYSQL.toString()); // new
 																// JLabel("Jdbc
 																// MySql");
 		ht.put(1, label);
@@ -91,14 +91,14 @@ public class PanelMenu extends JPanel implements ActionListener, ChangeListener{
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource() == saveAllButton) {
 			// if (!SchoolLauncher.getCourseList().isEmpty()) {
-			DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao()).saveAll();
+			DaoExamAbstract.getDaoExam(ExamenVerwaltung.getSelectedDao()).saveAll();
 			// } else if (!SchoolLauncher.getTeacherList().isEmpty()) {
 			// SchoolLauncher.getTeacherList().get(0).saveAll();
 			// } else if (!SchoolLauncher.getStudentList().isEmpty()) {
 			// SchoolLauncher.getStudentList().get(0).saveAll();
 			// }
 		} else if (arg0.getSource() == loadAllButton) {
-			DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao()).loadAll();
+			DaoExamAbstract.getDaoExam(ExamenVerwaltung.getSelectedDao()).loadAll();
 		}
 		ExamenVerwaltung.refresh();
 	}
@@ -109,12 +109,12 @@ public class PanelMenu extends JPanel implements ActionListener, ChangeListener{
 	public void stateChanged(ChangeEvent arg0) {
 		if (arg0.getSource() == dataBase) {
 			if (dataBase.getValue() == 0) {
-				if (!ExamenVerwaltung.getSelectedDao().equals(EDaoSchool.FILE)) {
-					ExamenVerwaltung.setSelectedDao(EDaoSchool.FILE);
+				if (!ExamenVerwaltung.getSelectedDao().equals(EDaoExam.FILE)) {
+					ExamenVerwaltung.setSelectedDao(EDaoExam.FILE);
 				}
 			} else if (dataBase.getValue() == 1) {
-				if (!ExamenVerwaltung.getSelectedDao().equals(EDaoSchool.JDBC_MYSQL)) {
-					ExamenVerwaltung.setSelectedDao(EDaoSchool.JDBC_MYSQL);
+				if (!ExamenVerwaltung.getSelectedDao().equals(EDaoExam.JDBC_MYSQL)) {
+					ExamenVerwaltung.setSelectedDao(EDaoExam.JDBC_MYSQL);
 				}
 			}
 		}

@@ -498,19 +498,19 @@ public class Shell {
 		case DATASOURCE:
 			switch (this.input) {
 			case 1:
-				ExamenVerwaltung.setSelectedDao(EDaoSchool.FILE);
-				System.out.println("Datenquelle auf " + EDaoSchool.FILE.toString() + " gewechselt.");
+				ExamenVerwaltung.setSelectedDao(EDaoExam.FILE);
+				System.out.println("Datenquelle auf " + EDaoExam.FILE.toString() + " gewechselt.");
 				break;
 			case 2:
-				ExamenVerwaltung.setSelectedDao(EDaoSchool.JDBC_MYSQL);
-				System.out.println("Datenquelle auf " + EDaoSchool.JDBC_MYSQL.toString() + " gewechselt.");
+				ExamenVerwaltung.setSelectedDao(EDaoExam.JDBC_MYSQL);
+				System.out.println("Datenquelle auf " + EDaoExam.JDBC_MYSQL.toString() + " gewechselt.");
 				break;
 			case 3:
-				DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao()).loadAll();
+				DaoExamAbstract.getDaoExam(ExamenVerwaltung.getSelectedDao()).loadAll();
 				System.out.println("Daten geladen.");
 				break;
 			case 4:
-				DaoSchoolAbstract.getDaoSchool(ExamenVerwaltung.getSelectedDao()).saveAll();
+				DaoExamAbstract.getDaoExam(ExamenVerwaltung.getSelectedDao()).saveAll();
 				System.out.println("Daten gespeichert.");
 				break;
 			case 5:
@@ -666,8 +666,8 @@ public class Shell {
 			case 1:
 				header.setLength(0);
 				header.append("Sie befinden sich auf <Datenquelle>\r\n");
-				name = "1. Datenquelle auf <" + EDaoSchool.FILE.toString() + "> setzen\r\n";
-				name += "2. Datenquelle auf <" + EDaoSchool.JDBC_MYSQL.toString() + "> setzen\r\n";
+				name = "1. Datenquelle auf <" + EDaoExam.FILE.toString() + "> setzen\r\n";
+				name += "2. Datenquelle auf <" + EDaoExam.JDBC_MYSQL.toString() + "> setzen\r\n";
 				name += "3. Datensatz per " + ExamenVerwaltung.getSelectedDao().toString() + " laden\r\n";
 				name += "4. Komplette Daten per " + ExamenVerwaltung.getSelectedDao().toString() + " speichern\r\n";
 				name += "5. Komplette Daten auf \"null\" setzen\r\n";

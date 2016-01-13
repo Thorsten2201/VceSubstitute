@@ -3,6 +3,8 @@ package de.bbq.java.tasks.vce;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.ComponentOrientation;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -15,11 +17,15 @@ import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -35,32 +41,37 @@ import javax.swing.tree.TreePath;
  * @author Thorsten2201
  *
  */
-public class PanelExam extends JPanel implements ActionListener, ListSelectionListener {
-	/////////////////////////////////////////////////////////////////////////////////////
+public class PanelExam extends JPanel implements ActionListener,
+		ListSelectionListener {
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = -6951335589393103017L;
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Class Properties
 	private boolean refresh = true;
 	private IQuestion selectedQuestion;
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Controls
-	private JButton addExamButton, deleteQuestionButton, addSolutionButton, removeSolutionButton;
+	private JButton addExamButton, deleteQuestionButton, addSolutionButton,
+			removeSolutionButton;
 	private JList<IQuestion> questionJList;
-	private JList<IExam> examJList;
 	private JTree examJTree;
 	private JList<IQuestion> solutionPoolJList, solutionSelectedJList;
 	private DefaultListModel<IQuestion> questionListModel;
-	private DefaultListModel<IExam> examListModel;
-	private DefaultListModel<IQuestion> solutionPoolListModel, questionSelectedListModel;
+	private DefaultListModel<IQuestion> solutionPoolListModel,
+			questionSelectedListModel;
 	private DefaultMutableTreeNode root;
-	/////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	private JList<IExam> examJList;
+	private DefaultListModel<IExam> examListModel;
+
+	// ///////////////////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Class methods
 	public void refresh() {
 		int selIndex = questionJList.getSelectedIndex();
@@ -84,11 +95,13 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 			}
 		}
 
-		for (Iterator<IExam> iterExam = ExamenVerwaltung.getExamList().iterator(); iterExam.hasNext();) {
+		for (Iterator<IExam> iterExam = ExamenVerwaltung.getExamList()
+				.iterator(); iterExam.hasNext();) {
 			IExam exam = (IExam) iterExam.next();
 			TreePath examPath = findNode(exam);
 			if (examPath == null) {
-				DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(exam);
+				DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(
+						exam);
 				newNode.setUserObject(exam);
 				int childCount = this.root.getChildCount();
 				this.root.insert(newNode, childCount);
@@ -99,14 +112,28 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 			}
 
 			DefaultMutableTreeNode examNode = getNodeFromPath(examPath);
-			for (Iterator<IQuestion> iterQuestion = exam.getQuestions().iterator(); iterQuestion.hasNext();) {
-				IQuestion solution = (IQuestion) iterQuestion.next();
-				TreePath solutionPath = findNode(solution);
-				if (solutionPath == null) {
-					DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(solution);
-					subNode.setUserObject(solution);
+			for (Iterator<IQuestion> iterQuestion = exam.getQuestions()
+					.iterator(); iterQuestion.hasNext();) {
+				IQuestion question = (IQuestion) iterQuestion.next();
+				TreePath questionPath = findNode(question);
+				if (questionPath == null) {
+					DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(
+							question);
+					subNode.setUserObject(question);
 					examNode.insert(subNode, examNode.getChildCount());
-					solutionPath = findNode(solution);
+					questionPath = findNode(question);
+				}
+				DefaultMutableTreeNode answerNode = getNodeFromPath(questionPath);
+				for (Iterator<IAnswer> iterAnswer = question.getAnswers()
+						.iterator(); iterAnswer.hasNext();) {
+					IAnswer answer = (IAnswer) iterAnswer.next();
+					TreePath answerPath = findNode(answer);
+					if (answerPath == null) {
+						DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(
+								answer);
+						subNode.setUserObject(answer);
+						answerNode.insert(subNode, answerNode.getChildCount());
+					}
 				}
 			}
 		}
@@ -133,21 +160,24 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 		} else if (selIndex < this.questionListModel.getSize()) {
 			this.questionJList.setSelectedIndex(selIndex);
 		} else {
-			this.questionJList.setSelectedIndex(this.questionListModel.getSize() - 1);
+			this.questionJList.setSelectedIndex(this.questionListModel
+					.getSize() - 1);
 		}
 		if (poolIndex < 0) {
 			// do Nothing
 		} else if (poolIndex < this.solutionPoolListModel.getSize()) {
 			this.solutionPoolJList.setSelectedIndex(poolIndex);
 		} else {
-			this.solutionPoolJList.setSelectedIndex(this.solutionPoolListModel.getSize() - 1);
+			this.solutionPoolJList.setSelectedIndex(this.solutionPoolListModel
+					.getSize() - 1);
 		}
 		checkButtons();
 		this.refresh = false;
 	}
 
 	private TreePath findNode(IQuestion solution) {
-		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root
+				.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			if (node.getUserObject() instanceof IQuestion) {
@@ -160,11 +190,28 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 		return null;
 	}
 
+	private TreePath findNode(IAnswer solution) {
+		Enumeration<DefaultMutableTreeNode> deepE = root
+				.depthFirstEnumeration();
+		while (deepE.hasMoreElements()) {
+			DefaultMutableTreeNode node = deepE.nextElement();
+			if (node.getUserObject() instanceof IAnswer) {
+				IAnswer a = (IAnswer) node.getUserObject();
+				if (a.equals(solution)) {
+					return new TreePath(node.getPath());
+				}
+			}
+		}
+		return null;
+	}
+
 	private void expandAllNodes(JTree tree) {
-		DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tree.getModel().getRoot();
+		DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tree
+				.getModel().getRoot();
 		int count = tree.getModel().getChildCount(rootNode);
 		for (int i = 0; i < count; i++) {
-			DefaultMutableTreeNode tempNode = (DefaultMutableTreeNode) tree.getModel().getChild(rootNode, i);
+			DefaultMutableTreeNode tempNode = (DefaultMutableTreeNode) tree
+					.getModel().getChild(rootNode, i);
 			TreePath path = new TreePath(tempNode.getPath());
 			tree.expandPath(path);
 			// tree.expandRow(i);
@@ -172,7 +219,8 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 	}
 
 	private DefaultMutableTreeNode getNodeFromPath(TreePath p) {
-		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root
+				.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			TreePath checkPath = new TreePath(node.getPath());
@@ -184,7 +232,8 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 	}
 
 	private TreePath findNode(String s) {
-		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root
+				.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			if (node.toString().equalsIgnoreCase(s)) {
@@ -195,7 +244,8 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 	}
 
 	private TreePath findNode(IExam e) {
-		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root
+				.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			if (node.getUserObject() instanceof IExam) {
@@ -209,7 +259,8 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 	}
 
 	void checkButtons() {
-		this.deleteQuestionButton.setEnabled(this.questionJList.getModel().getSize() > 0);
+		this.deleteQuestionButton.setEnabled(this.questionJList.getModel()
+				.getSize() > 0);
 		if (this.solutionSelectedJList.getSelectedIndex() < 0) {
 			if (this.solutionSelectedJList.getModel().getSize() > 0) {
 				this.solutionSelectedJList.setSelectedIndex(0);
@@ -220,12 +271,15 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 				this.solutionPoolJList.setSelectedIndex(0);
 			}
 		}
-		this.removeSolutionButton.setEnabled(this.solutionSelectedJList.getModel().getSize() > 0);
-		this.addSolutionButton.setEnabled(this.solutionPoolJList.getModel().getSize() > 0);
+		this.removeSolutionButton.setEnabled(this.solutionSelectedJList
+				.getModel().getSize() > 0);
+		this.addSolutionButton.setEnabled(this.solutionPoolJList.getModel()
+				.getSize() > 0);
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// ListSelectionListener
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
@@ -244,9 +298,10 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 			refresh();
 		}
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// ActionListener
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -260,12 +315,14 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 			index = this.examJTree.getRowCount();
 			// index = this.questionJList.getModel().getSize();
 		} else if (arg0.getSource() == this.deleteQuestionButton) {
-			if (!ExamenVerwaltung.getQuestionList().contains(this.selectedQuestion)) {
+			if (!ExamenVerwaltung.getQuestionList().contains(
+					this.selectedQuestion)) {
 				this.questionJList.setSelectedIndex(index);
 				this.selectedQuestion = this.questionJList.getSelectedValue();
 			}
 			if (this.selectedQuestion != null) {
-				ExamenVerwaltung.deleteElement((ExamItemAbstract) this.selectedQuestion);
+				ExamenVerwaltung
+						.deleteElement((ExamItemAbstract) this.selectedQuestion);
 				this.selectedQuestion = null;
 			}
 			if (index >= this.questionJList.getModel().getSize() - 1) {
@@ -273,15 +330,19 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 			}
 		}
 		if (arg0.getSource() == this.addSolutionButton) {
-			IQuestion selectedCourse = this.solutionPoolJList.getSelectedValue();
+			IQuestion selectedCourse = this.solutionPoolJList
+					.getSelectedValue();
 			if (selectedCourse != null) {
 				if (selectedQuestion != null) {
 					try {
 						if (!selectedCourse.hasExam()) {
 							try {
-								this.selectedQuestion.addQuestion(selectedCourse);
-								indexSel = this.solutionSelectedJList.getModel().getSize();
-								if (indexPool >= this.solutionPoolJList.getModel().getSize() - 1) {
+								this.selectedQuestion
+										.addQuestion(selectedCourse);
+								indexSel = this.solutionSelectedJList
+										.getModel().getSize();
+								if (indexPool >= this.solutionPoolJList
+										.getModel().getSize() - 1) {
 									indexPool--;
 								}
 							} catch (Exception e) {
@@ -294,12 +355,14 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 				}
 			}
 		} else if (arg0.getSource() == this.removeSolutionButton) {
-			IQuestion selectedCourse = this.solutionSelectedJList.getSelectedValue();
+			IQuestion selectedCourse = this.solutionSelectedJList
+					.getSelectedValue();
 			if (selectedCourse != null) {
 				if (this.selectedQuestion != null) {
 					try {
 						this.selectedQuestion.deleteQuestion(selectedCourse);
-						if (indexSel >= this.solutionSelectedJList.getModel().getSize() - 1) {
+						if (indexSel >= this.solutionSelectedJList.getModel()
+								.getSize() - 1) {
 							indexSel--;
 						}
 						if (indexPool < 0) {
@@ -326,9 +389,37 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 		}
 		checkButtons();
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	
+	void setupSpringLayout(String headline, int height, SpringLayout layout) {
+		JPanel topPanel = new JPanel();
+		JLabel label = new JLabel(headline);
+		// label.setBounds(110, 5, 100, 20);
+		topPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
+		topPanel.setMinimumSize(new Dimension(Integer.MAX_VALUE, height));
+		topPanel.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+		topPanel.add(label);
+
+		// Lay out the panel.
+		//Container borderPane = getContentPane();
+		Container borderPane = getRootPane();
+		borderPane.setLayout(new BorderLayout());
+		borderPane.add(topPanel, BorderLayout.NORTH);
+
+		JPanel contentPane = new JPanel();
+		contentPane.setLayout(layout);
+		contentPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+	}
+	
+	
+	
+	
+	
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Construct
 	public PanelExam() {
 		// this.setLayout(null); // new GridLayout(1, 1));
@@ -336,13 +427,16 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 		JPanel panelCreate = new JPanel(new GridLayout(1, 2, 5, 5));
 		setBorder(new EmptyBorder(5, 5, 5, 5));
 		JPanel panelTop = new JPanel(new GridLayout(1, 3, 10, 5));
-		JPanel panelBottom = new JPanel(new GridLayout(1, 3, 10, 10));
+//		JPanel panelBottom = new JPanel(new GridLayout(1, 3, 10, 10));
+		JPanel panelBottom = new JPanel(new SpringLayout());
 		panelTop.add(panelCreate);
+		
 		this.add(panelTop, BorderLayout.NORTH);
 
 		this.questionListModel = new DefaultListModel<>();
 		this.questionJList = new JList<IQuestion>(this.questionListModel);
-		this.questionJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.questionJList
+				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.questionJList.setLayoutOrientation(JList.VERTICAL);
 		this.questionJList.setVisibleRowCount(-1);
 		this.questionJList.addListSelectionListener(this);
@@ -359,14 +453,16 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) questionListModel.get(index));
+					ExamenVerwaltung.getInstance().editItem(
+							(ExamItemAbstract) questionListModel.get(index));
 				}
 			}
 		});
 
 		this.questionJList.setCellRenderer(new ExamListCellRenderer());
 
-		this.root = new DefaultMutableTreeNode(ExamenVerwaltung.getText("Exams"));
+		this.root = new DefaultMutableTreeNode(
+				ExamenVerwaltung.getText("Exams"));
 		examJTree = new JTree(root);
 		examJTree.setShowsRootHandles(true);
 		examJTree.setRootVisible(false);
@@ -378,37 +474,51 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 
 		examJTree.setCellRenderer(renderer);
 		expandAllNodes(examJTree);
+		
 		// JScrollPane teacherScroller = new JScrollPane(this.questionJList);
 		JScrollPane teacherScroller = new JScrollPane(this.examJTree);
 		teacherScroller.setPreferredSize(new Dimension(206, 300));
-		teacherScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		teacherScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		teacherScroller
+				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		teacherScroller
+				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		teacherScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		teacherScroller.setBounds(5, 30, 205, 300);
 		// this.add(teacherScroller);
-		panelBottom.add(teacherScroller);
+	panelBottom.add(teacherScroller);
 
-		this.addExamButton = ExamenVerwaltung.getButton("newTeacher", 5, 5, 100, 20, this, "Erstellen", "Neuer Leerer");
-		this.deleteQuestionButton = ExamenVerwaltung.getButton("delTeacher", 110, 5, 100, 20, this, "Löschen",
-				"Leerer löschen");
+		this.addExamButton = ExamenVerwaltung.getButton("newTeacher", 5, 5,
+				100, 20, this, "Erstellen", "Neuer Leerer");
+		this.deleteQuestionButton = ExamenVerwaltung.getButton("delTeacher",
+				110, 5, 100, 20, this, "Löschen", "Leerer löschen");
 		// this.add(this.addTeacherButton);
 		// this.add(this.deleteTeacherButton);
 		panelCreate.add(this.addExamButton);
 		panelCreate.add(this.deleteQuestionButton);
 
-		this.addSolutionButton = ExamenVerwaltung.getButton("addCourse", 235, 5, 205, 20, this, "Hinzufügen ->",
-				"Kurs Hinzufügen");
+		this.addSolutionButton = ExamenVerwaltung.getButton("addCourse", 235,
+				5, 205, 20, this, "Hinzufügen ->", "Kurs Hinzufügen");
 		// this.add(this.addCourseButton);
 		panelTop.add(this.addSolutionButton);
 
-		this.removeSolutionButton = ExamenVerwaltung.getButton("remCourse", 470, 5, 205, 20, this, "<- Entfernen",
-				"Kurs Entfernen");
+		this.removeSolutionButton = ExamenVerwaltung.getButton("remCourse",
+				470, 5, 205, 20, this, "<- Entfernen", "Kurs Entfernen");
 		// this.add(this.removeCourseButton);
 		panelTop.add(this.removeSolutionButton);
 
+		
+		
+
+		PanelEdit theNewEditPanel = new PanelEdit();
+		panelBottom.add(theNewEditPanel);
+		panelBottom.add(theNewEditPanel);	
+		
+		
 		this.solutionPoolListModel = new DefaultListModel<>();
-		this.solutionPoolJList = new JList<IQuestion>(this.solutionPoolListModel);
-		this.solutionPoolJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.solutionPoolJList = new JList<IQuestion>(
+				this.solutionPoolListModel);
+		this.solutionPoolJList
+				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.solutionPoolJList.setLayoutOrientation(JList.VERTICAL);
 		this.solutionPoolJList.setVisibleRowCount(-1);
 		this.solutionPoolJList.addMouseListener(new MouseAdapter() {
@@ -424,8 +534,11 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung.getInstance()
-							.editItem((ExamItemAbstract) ((List<IQuestion>) solutionPoolJList).get(index));
+					ExamenVerwaltung
+							.getInstance()
+							.editItem(
+									(ExamItemAbstract) ((List<IQuestion>) solutionPoolJList)
+											.get(index));
 					refresh();
 				}
 			}
@@ -434,15 +547,19 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 		JScrollPane poolScroller = new JScrollPane(this.solutionPoolJList);
 
 		poolScroller.setPreferredSize(new Dimension(206, 300));
-		poolScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		poolScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		poolScroller
+				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		poolScroller
+				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		poolScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		poolScroller.setBounds(235, 30, 205, 300);
 		// this.add(poolScroller);
 
 		this.questionSelectedListModel = new DefaultListModel<>();
-		this.solutionSelectedJList = new JList<IQuestion>(this.questionSelectedListModel);
-		this.solutionSelectedJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.solutionSelectedJList = new JList<IQuestion>(
+				this.questionSelectedListModel);
+		this.solutionSelectedJList
+				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.solutionSelectedJList.setLayoutOrientation(JList.VERTICAL);
 		this.solutionSelectedJList.setVisibleRowCount(-1);
 		this.solutionSelectedJList.addMouseListener(new MouseAdapter() {
@@ -458,8 +575,11 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung.getInstance()
-							.editItem((ExamItemAbstract) ((List<IQuestion>) solutionPoolJList).get(index));
+					ExamenVerwaltung
+							.getInstance()
+							.editItem(
+									(ExamItemAbstract) ((List<IQuestion>) solutionPoolJList)
+											.get(index));
 					refresh();
 				}
 			}
@@ -467,16 +587,18 @@ public class PanelExam extends JPanel implements ActionListener, ListSelectionLi
 
 		JScrollPane tookScroller = new JScrollPane(this.solutionSelectedJList);
 		tookScroller.setPreferredSize(new Dimension(206, 300));
-		tookScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		tookScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		tookScroller
+				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		tookScroller
+				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		tookScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		tookScroller.setBounds(470, 30, 205, 300);
 		// this.add(tookScroller);
-		panelBottom.add(poolScroller);
-		panelBottom.add(tookScroller);
+		//TODO:		panelBottom.add(poolScroller);
+		//TODO:		panelBottom.add(tookScroller);
 		this.add(panelBottom, BorderLayout.CENTER);
 		this.refresh = false;
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 
 }

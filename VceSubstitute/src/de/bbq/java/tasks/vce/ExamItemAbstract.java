@@ -15,7 +15,7 @@ public abstract class ExamItemAbstract implements Serializable {
 	private transient boolean isLastObject;
 	private transient boolean saved;
 	private transient String name;
-	protected static DaoSchoolAbstract dataAccessObject;
+	protected static DaoExamAbstract dataAccessObject;
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -24,11 +24,11 @@ public abstract class ExamItemAbstract implements Serializable {
 		return ExamItemAbstract.highestMemberId++;
 	}
 
-	public ExamItemAbstract(EDaoSchool eDataAccess) throws Exception {
+	public ExamItemAbstract(EDaoExam eDataAccess) throws Exception {
 		id = ExamItemAbstract.highestMemberId++;
-		DaoSchoolAbstract accessObject = null;
+		DaoExamAbstract accessObject = null;
 		try {
-			accessObject = DaoSchoolAbstract.getDaoSchool(eDataAccess);
+			accessObject = DaoExamAbstract.getDaoExam(eDataAccess);
 		} catch (Exception e) {
 			throw e;
 		}

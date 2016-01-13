@@ -68,11 +68,9 @@ public class FrameEdit extends JFrame implements ActionListener, ComponentListen
 				ExamenVerwaltung.saveItem(this.courseDF);
 			} else if (this.teacherDF != null) {
 				ReadDataPerson(this.teacherDF);
-//				ReadDataAdress(this.teacherDF.getAdress());
 				ExamenVerwaltung.saveItem(this.teacherDF);
 			} else if (this.studentDF != null) {
 				ReadDataPerson(this.studentDF);
-//				ReadDataAdress(this.studentDF.getAdress());
 				ExamenVerwaltung.saveItem(this.studentDF);
 			}
 			if (this.courseDF != null) {

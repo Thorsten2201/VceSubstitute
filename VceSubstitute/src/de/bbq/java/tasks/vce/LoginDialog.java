@@ -13,10 +13,10 @@ public class LoginDialog extends JDialog implements ActionListener {
 	private JPasswordField password = new JPasswordField();
 	private JButton saveButton, exitButton;
 	private boolean succeeded;
-	private DaoSchoolJdbcAbstract jdbcAbstract;
+	private DaoExamJdbcAbstract jdbcAbstract;
 	private JPanel contentPane;
 
-	public LoginDialog(Frame parent, DaoSchoolJdbcAbstract jdbcAbstract, String database, String username,
+	public LoginDialog(Frame parent, DaoExamJdbcAbstract jdbcAbstract, String database, String username,
 			String password) {
 		super(parent, "JDBC Anmelden", true);
 		this.jdbcAbstract = jdbcAbstract;
@@ -29,7 +29,7 @@ public class LoginDialog extends JDialog implements ActionListener {
 		setLocationRelativeTo(parent);
 	}
 
-	public LoginDialog(Frame parent, DaoSchoolJdbcAbstract jdbcAbstract) {
+	public LoginDialog(Frame parent, DaoExamJdbcAbstract jdbcAbstract) {
 		super(parent, "JDBC Anmelden", true);
 		this.jdbcAbstract = jdbcAbstract;
 		addControls();

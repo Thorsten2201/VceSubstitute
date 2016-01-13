@@ -6,11 +6,11 @@ import java.awt.Frame;
  * @author Thorsten2201
  *
  */
-public abstract class DaoSchoolJdbcAbstract extends DaoSchoolAbstract {
+public abstract class DaoExamJdbcAbstract extends DaoExamAbstract {
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Construct
-	protected DaoSchoolJdbcAbstract(EDaoSchool eDao) {
+	protected DaoExamJdbcAbstract(EDaoExam eDao) {
 		super(eDao);
 	}
 

@@ -14,21 +14,21 @@ import javax.swing.JFileChooser;
  * @author Thorsten2201
  *
  */
-public class DaoSchoolFile extends DaoSchoolAbstract {
+public class DaoExamFile extends DaoExamAbstract {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Class Properties
 	private File safeFile;
 	private boolean occupied = false, loading = false;
 	String out = "";
-	int cc, ct, cs, ca;
+	int countExams, countQuestions, countAnswers;
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Construct
-	public DaoSchoolFile() {
-		super(EDaoSchool.FILE);
+	public DaoExamFile() {
+		super(EDaoExam.FILE);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,16 +39,16 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 		int returnValue = -1;
 		if (ExamenVerwaltung.getShell()) {
 			if (export) {
-				this.safeFile = new File(ExamenVerwaltung.showInput("Bitte die Datei zum exportieren auswählen"));
+				this.safeFile = new File(ExamenVerwaltung.showInput("select.file.export"));
 			} else {
-				this.safeFile = new File(ExamenVerwaltung.showInput("Bitte die Datei zum importieren auswählen"));
+				this.safeFile = new File(ExamenVerwaltung.showInput("select.file.import"));
 			}
 		} else {
 			if (export) {
-				fileChooser.setDialogTitle("Bitte die Datei zum exportieren auswählen");
+				fileChooser.setDialogTitle(ExamenVerwaltung.getText("select.file.export"));
 				returnValue = fileChooser.showSaveDialog(null);
 			} else {
-				fileChooser.setDialogTitle("Bitte die Datei zum importieren auswählen");
+				fileChooser.setDialogTitle(ExamenVerwaltung.getText("select.file.import"));
 				returnValue = fileChooser.showOpenDialog(null);
 			}
 			if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -72,7 +72,7 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 		if (!this.occupied) {
 			this.occupied = true;
 			out = "";
-			cc = ct = cs = ca = 0;
+			countExams = countQuestions = countAnswers = 0;
 			ret = true;
 			if (this.safeFile == null) {
 				chooseFile(true);
@@ -87,12 +87,12 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 				}
 			}
 		}
-		if (schoolItemAbstract instanceof IQuestion) {
-			cc++;
+		if (schoolItemAbstract instanceof IExam) {
+			countExams++;
 		} else if (schoolItemAbstract instanceof IQuestion) {
-			ct++;
+			countQuestions++;
 		} else if (schoolItemAbstract instanceof IAnswer) {
-			cs++;
+			countAnswers++;
 		}
 		try {
 			oos.writeObject(schoolItemAbstract);
@@ -104,11 +104,11 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 		}
 		if (schoolItemAbstract.isLast()) {
 			this.occupied = false;
-			out += "In Datei gekotzt: " + cc + " mal Dummgelaber, " + ct + " Labertaschen und " + cs + " Hohlköpfe.";
+			out += ExamenVerwaltung.getText("saved.to.file") + " " + countExams + " " + ExamenVerwaltung.getText("exams") + ", " + countQuestions + " " + ExamenVerwaltung.getText("questions") + " " + ExamenVerwaltung.getText("and") + " " + countAnswers + " " + ExamenVerwaltung.getText("answers") + ".";
 			if (deleted) {
-				out += "\r\nVorhandene Datei gelöscht.";
+				out += "\r\n" + ExamenVerwaltung.getText("existing.file.deleted");
 			}
-			ExamenVerwaltung.showMessage("Dreck fertig!\r\n\r\n" + out);
+			ExamenVerwaltung.showMessage(ExamenVerwaltung.getText("ready") + "\r\n\r\n" + out);
 			try {
 				oos.close();
 			} catch (IOException e) {
@@ -126,31 +126,19 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 			if (schoolItemAbstract instanceof Answer) {
 				Answer.load((Answer) schoolItemAbstract);
 				System.out.println(((Answer) schoolItemAbstract).toString());
-				cs++;
+				countAnswers++;
 			}
 			if (schoolItemAbstract instanceof Question) {
 				Question.load((Question) schoolItemAbstract);
 				System.out.println(((Question) schoolItemAbstract).toString());
-				ct++;
+				countQuestions++;
 			}
-			if (schoolItemAbstract instanceof Question) {
-				Question course = (Question) schoolItemAbstract;
-				System.out.println(course.toString());
-				Question.load(course);
-				cc++;
+			if (schoolItemAbstract instanceof Exam) {
+				Exam exam = (Exam) schoolItemAbstract;
+				System.out.println(exam.toString());
+				Exam.load(exam);
+				countExams++;
 			}
-			// if (course.hasTeacher()) {
-			// Teacher.load((Teacher) course.getTeacher());
-			// ct++;
-			// }
-			// if (course.hasStudents()) {
-			// for (int index = 0; index < course.getStudents().size(); index++)
-			// {
-			//// course.getStudents().get(index).setCourse(course);
-			// // Student.load((Student) course.getStudents().get(index));
-			// // cs++;
-			// }
-			// }
 		}
 		return true;
 	}
@@ -158,7 +146,7 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 	@Override
 	public boolean loadAll() {
 		boolean ret = false;
-		cc = ct = cs = ca = 0;
+		countExams = countQuestions = countAnswers = 0;
 		chooseFile(false);
 		if (this.safeFile != null) {
 			try {
@@ -193,9 +181,9 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 					}
 				}
 				this.loading = false;
-				this.out = "Aus Datei gelutscht: " + cc + " mal Dummgelaber, " + ct + " Labertaschen und " + cs
-						+ " Hohlköpfe.";
-				ExamenVerwaltung.showMessage("Dreck fertig!\r\n\r\n" + out);
+				this.out = ExamenVerwaltung.getText("loaded.from.file") + " " + countExams + " " + ExamenVerwaltung.getText("exams") + ", " + countQuestions + " " +  ExamenVerwaltung.getText("questions") + " " + ExamenVerwaltung.getText("and") + " " + countAnswers
+						+ " " + ExamenVerwaltung.getText("answers")  + ".";
+				ExamenVerwaltung.showMessage(ExamenVerwaltung.getText("ready") + "\r\n\r\n" + out);
 				try {
 					ois.close();
 				} catch (IOException e) {
@@ -204,7 +192,7 @@ public class DaoSchoolFile extends DaoSchoolAbstract {
 				}
 			}
 		}
-		ExamenVerwaltung.setSelectedDao(EDaoSchool.FILE);
+		ExamenVerwaltung.setSelectedDao(EDaoExam.FILE);
 		this.safeFile = null;
 		return ret;
 	}

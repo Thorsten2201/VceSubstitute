@@ -2,6 +2,7 @@ package de.bbq.java.tasks.vce;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -58,6 +59,7 @@ public class PanelQuestion extends JPanel implements ActionListener,
 	// Class methods
 	public void refresh() {
 		this.refresh = true;
+
 		IQuestion qindex = null;
 		for (IQuestion q : ExamenVerwaltung.getQuestionList()) {
 			if (q.hasExam()) {
@@ -80,11 +82,17 @@ public class PanelQuestion extends JPanel implements ActionListener,
 				this.questionPoolListModel.removeElementAt(index - 1);
 			}
 		}
+		selectQuestion(this.questionPoolJList.getSelectedValue());
+		if (this.examJList.getSelectedValue() == null
+				&& !this.examListModel.isEmpty()) {
+			this.examJList.setSelectedIndex(0);
+		}
+		selectExam(this.examJList.getSelectedValue());
 		this.refresh = false;
 		checkButtons();
 	}
 
-	private void refreshExams(IQuestion source) {
+	private void refreshExams() {
 		this.refresh = true;
 		IExam exindex = null;
 		for (IExam c : ExamenVerwaltung.getExamList()) {
@@ -102,12 +110,17 @@ public class PanelQuestion extends JPanel implements ActionListener,
 				this.examListModel.removeElementAt(index - 1);
 			}
 		}
+		if (!this.examListModel.isEmpty()) {
+			this.examJList.setSelectedValue(exindex, true);
+			selectExam(exindex);
+		}
 		this.refresh = false;
 	}
 
 	public void checkButtons() {
 		this.deleteQuestionButton.setEnabled(this.questionPoolJList.getModel()
-				.getSize() > 0);
+				.getSize() > 0
+				&& this.questionPoolJList.getSelectedValue() != null);
 		if (this.questionsJList.getSelectedIndex() < 0) {
 			if (this.questionsJList.getModel().getSize() > 0) {
 				this.questionsJList.setSelectedIndex(0);
@@ -120,32 +133,9 @@ public class PanelQuestion extends JPanel implements ActionListener,
 		}
 		this.removeQuestionButton.setEnabled(this.questionsJList
 				.getSelectedValue() != null);
-		this.addQuestionButton.setEnabled(this.questionPoolJList
-				.getSelectedValue() != null);
-	}
-
-	// ///////////////////////////////////////////////////////////////////////////////////
-
-	// ///////////////////////////////////////////////////////////////////////////////////
-	// ListSelectionListener
-	@Override
-	public void valueChanged(ListSelectionEvent arg0) {
-		IQuestion selectedQuestion = (IQuestion) this.questionPoolJList
-				.getSelectedValue();
-		if (arg0.getSource() == this.questionPoolJList) {
-			if (!this.refresh) {
-				selectQuestion(selectedQuestion);
-			}
-		} else if (arg0.getSource() == this.examJList) {
-			IExam selectedExam = (IExam) this.examJList.getSelectedValue();
-			if (!this.refresh) {
-				questionListModel.clear();
-				for (IQuestion question : selectedExam.getQuestions()) {
-					this.questionListModel.addElement(question);
-				}
-			}
-		}
-		refresh();
+		boolean enable = this.questionPoolJList.getModel().getSize() > 0
+				&& this.questionPoolJList.getSelectedValue() != null;
+		this.addQuestionButton.setEnabled(enable);
 	}
 
 	private void selectExam(IExam selectedExam) {
@@ -167,13 +157,32 @@ public class PanelQuestion extends JPanel implements ActionListener,
 						this.questionListModel.addElement(selectedQuestion);
 					}
 				}
-			} else {
-
 			}
-			refreshExams(selectedQuestion);
+			refreshExams();
 		}
 	}
+	// ///////////////////////////////////////////////////////////////////////////////////
 
+	// ///////////////////////////////////////////////////////////////////////////////////
+	// ListSelectionListener
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		if (e.getSource() == this.questionPoolJList) {
+			IQuestion selectedQuestion = (IQuestion) this.questionPoolJList.getSelectedValue();
+			if (!this.refresh) {
+				selectQuestion(selectedQuestion);
+			}
+		} else if (e.getSource() == this.examJList) {
+			IExam selectedExam = (IExam) this.examJList.getSelectedValue();
+			if (!this.refresh) {
+				questionListModel.clear();
+				for (IQuestion question : selectedExam.getQuestions()) {
+					this.questionListModel.addElement(question);
+				}
+			}
+		}
+		checkButtons();
+	}
 	// ///////////////////////////////////////////////////////////////////////////////////
 
 	// ///////////////////////////////////////////////////////////////////////////////////
@@ -181,53 +190,54 @@ public class PanelQuestion extends JPanel implements ActionListener,
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		this.refresh = true;
-
-		int index = this.questionPoolJList.getSelectedIndex();
-		boolean selectExam = false; 
-		IQuestion poolSelected = this.questionPoolJList.getSelectedValue();
-		IExam examSelected = this.examJList.getSelectedValue();
+		boolean selectExam = false;
+		
+		IQuestion questionPool = this.questionPoolJList.getSelectedValue();
 		IQuestion selectedQuestion = this.questionsJList.getSelectedValue();
 
-		int exIndex = this.examJList.getSelectedIndex();
-
+		IExam exam = this.examJList.getSelectedValue();
+		
+		int index = this.questionPoolJList.getSelectedIndex();
+		
 		if (arg0.getSource() == createQuestionButton) {
 			ExamenVerwaltung.getNewQuestion(true);
 			index = this.questionPoolJList.getModel().getSize();
-		} else if (arg0.getSource() == deleteQuestionButton) {
-			IQuestion selected = this.questionPoolJList.getSelectedValue();
-			if (selected != null) {
-				ExamenVerwaltung.deleteElement((ExamItemAbstract) selected);
-				index = this.questionPoolJList.getModel().getSize();
-			}
 			
+		} else if (arg0.getSource() == deleteQuestionButton) {
+			if (questionPool != null) {
+				ExamenVerwaltung.deleteElement((ExamItemAbstract) questionPool);
+				index = this.questionPoolJList.getModel().getSize();
+				selectExam = true;
+			}
+
 		} else if (arg0.getSource() == addQuestionButton) {
-			if (poolSelected != null && examSelected != null) {
-				if (!examSelected.hasQuestion(poolSelected)) {
-					examSelected.addQuestion(poolSelected);
+			if (questionPool != null && exam != null) {
+				if (!exam.hasQuestion(questionPool)) {
+					exam.addQuestion(questionPool);
 				}
 			}
-			selectExam=true;
+			selectExam = true;
+
 		} else if (arg0.getSource() == removeQuestionButton) {
-			if (examSelected != null) {
+			if (selectedQuestion != null) {
 				selectedQuestion.getExam().removeQuestion(selectedQuestion);
-				selectExam=true;
+				selectExam = true;
 			}
 		}
 		this.refresh = false;
 		refresh();
 		if (index <= this.questionPoolJList.getModel().getSize()) {
 			this.questionPoolJList.setSelectedIndex(index);
-		} 
-		selectQuestion(this.questionPoolJList.getSelectedValue());
-		
-		this.deleteQuestionButton.setEnabled(this.questionPoolJList
-				.getSelectedValue() != null);
-		if (selectExam) {
-			selectExam(examSelected);
 		}
+		selectQuestion(this.questionPoolJList.getSelectedValue());
+		if (index <= this.examJList.getModel().getSize()) {
+			this.examJList.setSelectedIndex(index);
+		}
+		if (selectExam) {
+			selectExam(exam);
+		}
+		checkButtons();
 	}
-
-	// ///////////////////////////////////////////////////////////////////////////////////
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Construct
@@ -285,7 +295,7 @@ public class PanelQuestion extends JPanel implements ActionListener,
 		panelBottom.add(questionPoolScroller);
 
 		this.createQuestionButton = ExamenVerwaltung.getButton(
-				"newCourse",
+				"newQuestion",
 				5,
 				5,
 				130,
@@ -297,7 +307,7 @@ public class PanelQuestion extends JPanel implements ActionListener,
 						+ ExamenVerwaltung.getText("question"));
 
 		this.deleteQuestionButton = ExamenVerwaltung.getButton(
-				"delCourse",
+				"delQuestion",
 				110,
 				5,
 				130,
@@ -310,8 +320,34 @@ public class PanelQuestion extends JPanel implements ActionListener,
 		panelCreate.add(this.createQuestionButton);
 		panelCreate.add(this.deleteQuestionButton);
 
+		this.addQuestionButton = ExamenVerwaltung.getButton(
+				"addQuestion",
+				235,
+				5,
+				205,
+				20,
+				this,
+				ExamenVerwaltung.getText("Add") + " ->",
+				ExamenVerwaltung.getText("Add") + " "
+						+ ExamenVerwaltung.getText("question"));
+		panelTop.add(this.addQuestionButton);
+
+		this.removeQuestionButton = ExamenVerwaltung.getButton(
+				"remQuestion",
+				470,
+				5,
+				205,
+				20,
+				this,
+				"<- " + ExamenVerwaltung.getText("Remove"),
+				ExamenVerwaltung.getText("Remove")
+						+ ExamenVerwaltung.getText("question"));
+		panelTop.add(this.removeQuestionButton);
+
 		this.examListModel = new DefaultListModel<IExam>();
 		this.examJList = new JList<IExam>(this.examListModel);
+		this.examJList
+				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.examJList.setLayoutOrientation(JList.VERTICAL);
 		this.examJList.setVisibleRowCount(1);
 		this.examJList.addListSelectionListener(this);
@@ -334,15 +370,15 @@ public class PanelQuestion extends JPanel implements ActionListener,
 				}
 			}
 		});
+		this.examJList.setCellRenderer(new ExamListCellRenderer());
 		JScrollPane pupScroller = new JScrollPane(this.examJList);
-		// pupScroller.setPreferredSize(new Dimension(206, 300));
+		pupScroller.setPreferredSize(new Dimension(206, 300));
 		pupScroller
 				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		pupScroller
 				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		pupScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		pupScroller.setBounds(235, 30, 265, 300);
-		// this.add(pupScroller);
 		panelBottom.add(pupScroller);
 
 		this.questionListModel = new DefaultListModel<IQuestion>();
@@ -370,55 +406,18 @@ public class PanelQuestion extends JPanel implements ActionListener,
 			}
 		});
 		JScrollPane selQuestions = new JScrollPane(this.questionsJList);
-		// pupScroller.setPreferredSize(new Dimension(206, 300));
+		selQuestions.setPreferredSize(new Dimension(206, 300));
 		selQuestions
 				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		selQuestions
 				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		selQuestions.setViewportBorder(new LineBorder(Color.BLACK));
 		selQuestions.setBounds(235, 30, 265, 300);
-		// this.add(pupScroller);
 		panelBottom.add(selQuestions);
-
-		this.addQuestionButton = ExamenVerwaltung.getButton(
-				"addQuestion",
-				235,
-				5,
-				205,
-				20,
-				this,
-				ExamenVerwaltung.getText("Add") + " ->",
-				ExamenVerwaltung.getText("Add")
-						+ ExamenVerwaltung.getText("question"));
-		// this.add(this.addCourseButton);
-		panelTop.add(this.addQuestionButton);
-
-		this.removeQuestionButton = ExamenVerwaltung.getButton(
-				"remQuestion",
-				470,
-				5,
-				205,
-				20,
-				this,
-				"<- " + ExamenVerwaltung.getText("Remove"),
-				ExamenVerwaltung.getText("Remove")
-						+ ExamenVerwaltung.getText("question"));
-		// this.add(this.removeCourseButton);
-		panelTop.add(this.removeQuestionButton);
-		// this.add(panelTop);
 
 		this.add(panelBottom, BorderLayout.CENTER);
 		this.refresh = false;
 	}
 
-	class DisabledItemSelectionModel extends DefaultListSelectionModel {
-		private static final long serialVersionUID = -284117077233876776L;
-
-		@Override
-		public void setSelectionInterval(int index0, int index1) {
-			super.setSelectionInterval(-1, -1);
-		}
-	}
 	// ///////////////////////////////////////////////////////////////////////////////////
-
 }
