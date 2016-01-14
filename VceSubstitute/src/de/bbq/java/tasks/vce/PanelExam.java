@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -30,6 +31,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -42,7 +45,7 @@ import javax.swing.tree.TreePath;
  *
  */
 public class PanelExam extends JPanel implements ActionListener,
-		ListSelectionListener {
+		ListSelectionListener, TreeSelectionListener {
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = -6951335589393103017L;
@@ -68,6 +71,8 @@ public class PanelExam extends JPanel implements ActionListener,
 
 	private JList<IExam> examJList;
 	private DefaultListModel<IExam> examListModel;
+
+	private int labelWidth = 200;
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 
@@ -391,34 +396,7 @@ public class PanelExam extends JPanel implements ActionListener,
 	}
 
 	// ///////////////////////////////////////////////////////////////////////////////////
-	
-	
-	
-	
-	void setupSpringLayout(String headline, int height, SpringLayout layout) {
-		JPanel topPanel = new JPanel();
-		JLabel label = new JLabel(headline);
-		// label.setBounds(110, 5, 100, 20);
-		topPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
-		topPanel.setMinimumSize(new Dimension(Integer.MAX_VALUE, height));
-		topPanel.setAlignmentY(JComponent.CENTER_ALIGNMENT);
-		topPanel.add(label);
 
-		// Lay out the panel.
-		//Container borderPane = getContentPane();
-		Container borderPane = getRootPane();
-		borderPane.setLayout(new BorderLayout());
-		borderPane.add(topPanel, BorderLayout.NORTH);
-
-		JPanel contentPane = new JPanel();
-		contentPane.setLayout(layout);
-		contentPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-	}
-	
-	
-	
-	
-	
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Construct
 	public PanelExam() {
@@ -427,10 +405,18 @@ public class PanelExam extends JPanel implements ActionListener,
 		JPanel panelCreate = new JPanel(new GridLayout(1, 2, 5, 5));
 		setBorder(new EmptyBorder(5, 5, 5, 5));
 		JPanel panelTop = new JPanel(new GridLayout(1, 3, 10, 5));
-//		JPanel panelBottom = new JPanel(new GridLayout(1, 3, 10, 10));
-		JPanel panelBottom = new JPanel(new SpringLayout());
+		// JPanel panelBottom = new JPanel(new GridLayout(1, 3, 10, 10));
+		SpringLayout layout = new SpringLayout();
+		//TODO:
+		JPanel panelBottom = new PanelEdit2(); // JPanel(layout);
+		panelBottom.setLayout(layout);
+		panelBottom.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+
+		// layout.putConstraint(SpringLayout.WEST, label, 5, SpringLayout.WEST,
+		// contentPane);
+
 		panelTop.add(panelCreate);
-		
+
 		this.add(panelTop, BorderLayout.NORTH);
 
 		this.questionListModel = new DefaultListModel<>();
@@ -466,7 +452,7 @@ public class PanelExam extends JPanel implements ActionListener,
 		examJTree = new JTree(root);
 		examJTree.setShowsRootHandles(true);
 		examJTree.setRootVisible(false);
-
+		examJTree.addTreeSelectionListener(this);
 		// ImageIcon imageIcon = new
 		// ImageIcon(TreeExample.class.getResource("/leaf.jpg"));
 		DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
@@ -474,9 +460,9 @@ public class PanelExam extends JPanel implements ActionListener,
 
 		examJTree.setCellRenderer(renderer);
 		expandAllNodes(examJTree);
-		
+
 		// JScrollPane teacherScroller = new JScrollPane(this.questionJList);
-		JScrollPane teacherScroller = new JScrollPane(this.examJTree);
+		JScrollPane teacherScroller = new JScrollPane(); //
 		teacherScroller.setPreferredSize(new Dimension(206, 300));
 		teacherScroller
 				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -485,8 +471,11 @@ public class PanelExam extends JPanel implements ActionListener,
 		teacherScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		teacherScroller.setBounds(5, 30, 205, 300);
 		// this.add(teacherScroller);
-	panelBottom.add(teacherScroller);
+		panelBottom.add(teacherScroller);
 
+		layout.putConstraint(SpringLayout.SOUTH, teacherScroller, 0, SpringLayout.SOUTH, panelBottom);
+		layout.putConstraint(SpringLayout.NORTH, teacherScroller, 0, SpringLayout.NORTH, panelBottom);
+		
 		this.addExamButton = ExamenVerwaltung.getButton("newTeacher", 5, 5,
 				100, 20, this, "Erstellen", "Neuer Leerer");
 		this.deleteQuestionButton = ExamenVerwaltung.getButton("delTeacher",
@@ -506,14 +495,9 @@ public class PanelExam extends JPanel implements ActionListener,
 		// this.add(this.removeCourseButton);
 		panelTop.add(this.removeSolutionButton);
 
-		
-		
+//		PanelEdit theNewEditPanel = new PanelEdit();
+//		panelBottom.add(theNewEditPanel);
 
-		PanelEdit theNewEditPanel = new PanelEdit();
-		panelBottom.add(theNewEditPanel);
-		panelBottom.add(theNewEditPanel);	
-		
-		
 		this.solutionPoolListModel = new DefaultListModel<>();
 		this.solutionPoolJList = new JList<IQuestion>(
 				this.solutionPoolListModel);
@@ -594,11 +578,41 @@ public class PanelExam extends JPanel implements ActionListener,
 		tookScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		tookScroller.setBounds(470, 30, 205, 300);
 		// this.add(tookScroller);
-		//TODO:		panelBottom.add(poolScroller);
-		//TODO:		panelBottom.add(tookScroller);
+		// TODO: panelBottom.add(poolScroller);
+		// TODO: panelBottom.add(tookScroller);
+
+		JPanel labels = new JPanel();
+		labels.setLayout(new BoxLayout(labels, BoxLayout.Y_AXIS));
+		labels.setPreferredSize(new Dimension(labelWidth, 10));
+		labels.setMaximumSize(new Dimension(labelWidth, Integer.MAX_VALUE));
+
+		JPanel texts = new JPanel();
+		texts.setLayout(new BoxLayout(texts, BoxLayout.Y_AXIS));
+
+		
+		
+		
+//		PanelEdit editPanel = new PanelEdit();
+//		panelBottom.add(editPanel);
+//		panelBottom.setOpaque(true);
+//		panelBottom.setBackground(Color.BLUE);
+//		tookScroller.setVisible(false);
+//		layout.putConstraint(SpringLayout.EAST, teacherScroller, 0, SpringLayout.EAST, editPanel);
+		
+		
+		
 		this.add(panelBottom, BorderLayout.CENTER);
 		this.refresh = false;
+
+		
+		
 	}
 	// ///////////////////////////////////////////////////////////////////////////////////
+
+	@Override
+	public void valueChanged(TreeSelectionEvent arg0) {
+		// TODO Auto-generated method stub
+		System.out.println(arg0.getPath());
+	}
 
 }

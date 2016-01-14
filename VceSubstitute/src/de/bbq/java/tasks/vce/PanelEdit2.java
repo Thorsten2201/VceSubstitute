@@ -1,27 +1,25 @@
 package de.bbq.java.tasks.vce;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridLayout;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 
-public class PanelEdit extends JPanel {
+public class PanelEdit2 extends JPanel {
 	private static final long serialVersionUID = -2186316596347702853L;
 
-	public PanelEdit() {
+	public PanelEdit2() {
 		setOpaque(true);
-		setBackground(Color.GREEN);
+		setBackground(Color.BLUE);
 		SpringLayout layout = new SpringLayout();
-//		setLayout(layout);
-		setLayout(new BorderLayout());
-		PanelEdit2 a = new PanelEdit2();
-		this.add(a,BorderLayout.EAST);
-		a.setBounds(200, 100, 300, 200);
+		setLayout(layout);
+		JButton a = new JButton();
+		a.setText("HALLO WELT");
+		a.setBounds(100, 100, 500, 40);
+		
+		this.add(a);
 		layout.putConstraint(SpringLayout.EAST, a, 10, SpringLayout.EAST, this);
 	}
 }

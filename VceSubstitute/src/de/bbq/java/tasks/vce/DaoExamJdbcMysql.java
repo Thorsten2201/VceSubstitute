@@ -27,12 +27,17 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 	final String EXAM_TABLE = "exam";
 	final String QUESTION_TABLE = "question";
 	final String ANSWER_TABLE = "answer";
+	
 	final String CATEGORY_TABLE = "category";
+	final String EXAM_QUESTION_MAP_TABLE = "questionMap";
+	final String QUESTION_ANSWER_MAP_TABLE = "answerMap";
 	
 	HashMap<Integer, Long> examIds = new HashMap<>();
 	HashMap<Long, Integer> examIdsInv = new HashMap<>();
 	HashMap<Long, Integer> questionIds = new HashMap<>();
+	HashMap<Integer, Long> questionIdsInv = new HashMap<>();
 	HashMap<Long, Integer> answerIds = new HashMap<>();
+	HashMap<Integer, Long> answerIdsInv = new HashMap<>();
 
 	ResultSet resultSet;
 
@@ -133,9 +138,11 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				statement.setInt(1, question.getNumber());
 				statement.setString(2, question.getLanguage());
 				statement.setString(3, question.getQuestionText());
-				//TODO: Image-Blob
-//				statement.setBinaryStream(4, question.getImageStream()); 
-				statement.setNull(4, java.sql.Types.BLOB);
+				if(question.getImageStream() == null) {
+					statement.setNull(4, java.sql.Types.BLOB);
+				} else {
+					statement.setBinaryStream(4, question.getImageStream()); 
+				}
 				statement.setString(5, question.getQuestionFooter());
 				statement.setString(6, question.getAnswerExplanation());
 				statement.setInt(7, question.getImageLine());
@@ -339,65 +346,45 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 		try {
 			if (examItemAbstract instanceof IQuestion) {
 				Question sqlQuestion = (Question) examItemAbstract;
-				examIds.put(resultSet.getInt(1), sqlQuestion.getId());
-				examIdsInv.put(sqlQuestion.getId(), resultSet.getInt(1));
-				int sqlQuestionId = resultSet.getInt(2);
-				sqlQuestion.setQuestionName(resultSet.getString(3));
-				sqlQuestion.setLanguage(resultSet.getString(5));
-				//TODO: sqlCourse.setNeedsBeamer(resultSet.getBoolean(6));
-				// sqlCourse.setRoomNumber(resultSet.getString(7));
-				// sqlCourse.setStartTime(resultSet.getDate(8));
-				// sqlCourse.setTopic(resultSet.getString(9));
-				// get teacher
-				// for (ITeacher t : SchoolLauncher.getTeacherList()) {
-				// if (sqlTeacherId == ((Teacher) t).getId()) {
-				// try {
-				// t.addCourse(sqlCourse);
-				// } catch (Exception e) {
-				// JOptionPane.showMessageDialog(null, e.getMessage());
-				// e.printStackTrace();
-				// }
-				// break;
-				// }
-				// }
-				return checkIds(sqlQuestion, sqlQuestionId); // checkIds();
-			} else if (examItemAbstract instanceof IQuestion) {
-				Question sqlTeacher = (Question) examItemAbstract;
-				int teacherId = resultSet.getInt(1);
-				questionIds.put(sqlTeacher.getId(), teacherId);
-				// TODO: sqlTeacher.setLastName(resultSet.getString(2));
-				// sqlTeacher.setFirstName(resultSet.getString(3));
-				// sqlTeacher.setBirthDate(resultSet.getDate(4));
-				// sqlTeacher.getAdress().setCity(resultSet.getString(5));
-				// sqlTeacher.getAdress().setCountry(resultSet.getString(6));
-				// sqlTeacher.getAdress().setHouseNumber(resultSet.getString(7));
-				// sqlTeacher.getAdress().setStreetName(resultSet.getString(8));
-				// sqlTeacher.getAdress().setZipCode(resultSet.getInt(9));
-				return checkIds(sqlTeacher);
+				long sqlQuestionId = sqlQuestion.getId();
+				questionIdsInv.put(resultSet.getInt(1), sqlQuestion.getId());
+				questionIds.put(sqlQuestion.getId(), resultSet.getInt(1));
+				sqlQuestion.setNumber(resultSet.getInt(2));
+				sqlQuestion.setLanguage(resultSet.getString(3));
+				sqlQuestion.setQuestionText(resultSet.getString(4));
+//				sqlQuestion.setQuestionName(resultSet.getString(3));
+				sqlQuestion.setQuestionImage(resultSet.getBinaryStream(5));
+//				sqlQuestion.setCategories(categories);
+				sqlQuestion.setQuestionFooter(resultSet.getString(6));
+				sqlQuestion.setAnswerExpailnation(resultSet.getString(7));
+				sqlQuestion.setImageLine(resultSet.getInt(8));
+			
+				//TODO multivalue category
+				return checkIds(sqlQuestion);	 // checkIds();
+		
+			} else if (examItemAbstract instanceof IExam) {
+				Exam sqlExam = (Exam) examItemAbstract;
+				int examId = resultSet.getInt(1);
+				examIds.put(resultSet.getInt(1), sqlExam.getId());
+				examIdsInv.put(sqlExam.getId(), resultSet.getInt(1));
+				sqlExam.setName(resultSet.getString(2));
+				sqlExam.setDescription(resultSet.getString(3));		
+				sqlExam.setLanguage(resultSet.getString(4));
+
+				return checkIds(sqlExam, examId);
 			} else if (examItemAbstract instanceof IAnswer) {
-				Answer sqlStudent = (Answer) examItemAbstract;
-				int studentId = resultSet.getInt(1);
-				int courseId = resultSet.getInt(2);
-				answerIds.put(sqlStudent.getId(), studentId);
-				// TODO: sqlStudent.setLastName(resultSet.getString(3));
-				// sqlStudent.setFirstName(resultSet.getString(4));
-				// sqlStudent.setBirthDate(resultSet.getDate(5));
-				// sqlStudent.getAdress().setCity(resultSet.getString(6));
-				// sqlStudent.getAdress().setCountry(resultSet.getString(7));
-				// sqlStudent.getAdress().setHouseNumber(resultSet.getString(8));
-				// sqlStudent.getAdress().setStreetName(resultSet.getString(9));
-				// sqlStudent.getAdress().setZipCode(resultSet.getInt(10));
-				// GetCourse
-				// if (this.courseIds.containsKey(courseId)) {
-				// Long javaCourseId = this.courseIds.get(courseId);
-				// for (ICourse c : SchoolLauncher.getCourseList()) {
-				// if (javaCourseId.equals(((Course) c).getId())) {
-				// c.addStudent(sqlStudent);
-				// break;
-				// }
-				// }/
-				// }
-				return checkIds(sqlStudent, courseId);
+				Answer sqlAnswer = (Answer) examItemAbstract;
+				int answerId = resultSet.getInt(1);
+//				int examId = resultSet.getInt(2);
+				char inx =resultSet.getString(2).charAt(0);
+				sqlAnswer.setIndex(inx);
+				sqlAnswer.setAnswerText(resultSet.getString(3));
+				sqlAnswer.setTrue(resultSet.getBoolean(4));
+				sqlAnswer.setPosition(resultSet.getInt(5));
+				
+				answerIds.put(sqlAnswer.getId(), answerId);
+				answerIdsInv.put(resultSet.getInt(1), sqlAnswer.getId());
+				return checkIds(sqlAnswer, answerId);
 			}
 		} catch (Exception e) {
 			return false;
@@ -418,7 +405,9 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				examIds = new HashMap<>();
 				examIdsInv = new HashMap<>();
 				questionIds = new HashMap<>();
+				questionIdsInv = new HashMap<>();
 				answerIds = new HashMap<>();
+				answerIdsInv = new HashMap<>();
 
 				preparedStatement = this.getConnection()
 						.prepareStatement("SELECT `id`,`number`,`language`,`questionText`,`image`, "
@@ -561,34 +550,34 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 		}
 	}
 
-	private boolean checkIds(IQuestion course, int sqlCoursQuestionId) {
+	private boolean checkIds(IExam examCheck, long sqlExamId) {
 		for (IQuestion question : ExamenVerwaltung.getQuestionList()) {
 			int sqlQuestionId = -1;
-			ExamItemAbstract t = (ExamItemAbstract) question;
-			if (this.questionIds.containsKey(t.getId())) {
-				sqlQuestionId = this.questionIds.get(t.getId());
+			ExamItemAbstract q = (ExamItemAbstract) question;
+			if (this.questionIds.containsKey(q.getId())) {
+				sqlQuestionId = this.questionIds.get(q.getId());
 			}
-			if (sqlCoursQuestionId == sqlQuestionId) {
-				course.addQuestion(question);
+			if (sqlExamId == sqlQuestionId) {
+				examCheck.addQuestion(question);
 			}
 		}
 		// Always, return value for loadElement
 		return true;
 	}
 
-	private boolean checkIds(IQuestion question) {
-		for (IQuestion q : ExamenVerwaltung.getQuestionList()) {
-			ExamItemAbstract e = (ExamItemAbstract) q;
-			int sqlCourseId = 0, sqlTeacherId = -1;
-			if (this.examIdsInv.containsKey(e.getId())) {
-				sqlCourseId = this.examIdsInv.get(e.getId());
-				for (IQuestion quest : Question.getQuestions()) {
-					ExamItemAbstract tc = (ExamItemAbstract) quest;
-					if (this.examIdsInv.containsKey(tc.getId())) {
-						sqlTeacherId = this.examIdsInv.get(tc.getId());
+	private boolean checkIds(IQuestion questionCheck) {
+		for (IExam iExam : ExamenVerwaltung.getExamList()) {
+			ExamItemAbstract itemAbstract = (ExamItemAbstract) iExam;
+			int sqlExamId = 0, sqlQuestionId = -1;
+			if (this.examIdsInv.containsKey(itemAbstract.getId())) {
+				sqlExamId = this.examIdsInv.get(itemAbstract.getId());
+				for (IQuestion iQuestion : Question.getQuestions()) {
+					ExamItemAbstract questionAbstact = (ExamItemAbstract) iQuestion;
+					if (this.examIdsInv.containsKey(questionAbstact.getId())) {
+						sqlQuestionId = this.examIdsInv.get(questionAbstact.getId());
 					}
-					if (sqlCourseId == sqlTeacherId) {
-						q.addQuestion(question);
+					if (sqlExamId == sqlQuestionId) {
+						iExam.addQuestion(questionCheck);
 					}
 				}
 			}
@@ -597,15 +586,15 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 		return true;
 	}
 
-	private boolean checkIds(IAnswer student, int sqlCourseId) {
+	private boolean checkIds(IAnswer answer, int sqlExamId) {
 		// int sqlStudentId = this.studentIds.get(((SchoolItemAbstract)
 		// student).getId());
-		for (IQuestion course : ExamenVerwaltung.getQuestionList()) {
-			ExamItemAbstract sac = (ExamItemAbstract) course;
-			if (this.examIdsInv.containsKey(sac.getId())) {
-				int sqlStudentId = this.examIdsInv.get(sac.getId());
-				if (sqlCourseId == sqlStudentId) {
-					course.addAnswer(student);
+		for (IQuestion question : ExamenVerwaltung.getQuestionList()) {
+			ExamItemAbstract qabstract = (ExamItemAbstract) question;
+			if (this.examIdsInv.containsKey(qabstract.getId())) {
+				int sqlAnswerId = this.examIdsInv.get(qabstract.getId());
+				if (sqlExamId == sqlAnswerId) {
+					question.addAnswer(answer);
 					break;
 				}
 			}
@@ -641,6 +630,16 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 		case 3:
 			sql = "CREATE TABLE `" + CATEGORY_TABLE + "` (id INTEGER NOT NULL AUTO_INCREMENT, `categoryName` NVARCHAR(255), `language` NVARCHAR(255), "
 					+ " `description` NVARCHAR(4096), primary key(id))";		
+			break;
+		case 4:
+			sql = "CREATE TABLE `" + CATEGORY_TABLE + "` (id INTEGER NOT NULL AUTO_INCREMENT, `categoryName` NVARCHAR(255), `language` NVARCHAR(255), "
+					+ " `description` NVARCHAR(4096), primary key(id))";	
+			break;
+		case 5:
+			sql = "CREATE TABLE `" + EXAM_QUESTION_MAP_TABLE + "` (`examId` INTEGER NOT NULL, `questionId` INTEGER NOT NULL)";	
+			break;
+		case 6:
+			sql = "CREATE TABLE `" + QUESTION_ANSWER_MAP_TABLE + "` (`questionId` INTEGER NOT NULL, `answerId` INTEGER NOT NULL)";	
 			break;
 		}
 

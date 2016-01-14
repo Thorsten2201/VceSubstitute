@@ -1,6 +1,9 @@
 package de.bbq.java.tasks.vce;
 
 import java.awt.Image;
+import java.awt.Toolkit;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -9,13 +12,13 @@ import java.util.ArrayList;
  *
  */
 public class Question extends ExamItemAbstract implements IQuestion {
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Class Properties
 	private ArrayList<IAnswer> answers = new ArrayList<>();
 	private ArrayList<String> categories = new ArrayList<>();
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Properties to serialize
 	private int number;
 	private String language;
@@ -24,18 +27,20 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	private String questionFooter;
 	private String answerExplanation;
 	private int imageLine;
-	/////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Construct
 	private Question(String name, EDaoExam eDataAccess) throws Exception {
 		super(eDataAccess);
 		super.setName(name);
 		this.number = allQuestions.size() + 1;
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
 
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = -3548796163205043453L;
 	private static ArrayList<IQuestion> allQuestions = new ArrayList<>();
@@ -47,12 +52,15 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	}
 
 	private static String generateNewName() {
-		String[] array = new String[] { "Geistig Abwesender", "Laubbläsleer", "Labersack", "Zutexter", "Volllaberer",
-				"Berieseler", "Hintergrundrauschen", "Verstörendes Geräusch", "Dildogesicht", "Halodri",
-				"Birkenstockdepp", "Fotzenkopf", "Hirschfresse", "Althippy", "Schnarchnase" };
+		String[] array = new String[] { "Geistig Abwesender", "Laubbläsleer",
+				"Labersack", "Zutexter", "Volllaberer", "Berieseler",
+				"Hintergrundrauschen", "Verstörendes Geräusch", "Dildogesicht",
+				"Halodri", "Birkenstockdepp", "Fotzenkopf", "Hirschfresse",
+				"Althippy", "Schnarchnase" };
 		@SuppressWarnings("unused")
 		int randomNum = 0 + (int) (Math.random() * array.length);
-		return ExamenVerwaltung.getText("Question") + " " + (allQuestions.size() + 1);// :array[randomNum];
+		return ExamenVerwaltung.getText("Question") + " "
+				+ (allQuestions.size() + 1);// :array[randomNum];
 	}
 
 	public static Question createQuestion(String firstName, EDaoExam eDataAccess) {
@@ -101,7 +109,8 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	public static void reset() {
 		allQuestions = new ArrayList<>();
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
+
+	// ///////////////////////////////////////////////////////////////////////////////////
 
 	private static ArrayList<IQuestion> getAllQuestions() {
 		if (allQuestions == null) {
@@ -231,8 +240,15 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		return questionImage;
 	}
 
-	public void setQuestionImage(Image questionImage) {
-		this.questionImage = questionImage;
+	public void setQuestionImage(InputStream inputStream) throws IOException {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		int readOk = inputStream.read();
+		while (readOk >= 0) {
+			outputStream.write((char) readOk);
+			readOk = inputStream.read();
+		}
+		this.questionImage = Toolkit.getDefaultToolkit().createImage(
+				outputStream.toByteArray());
 	}
 
 	public String getQuestionFooter() {
@@ -266,12 +282,12 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	public void setCategories(ArrayList<String> categories) {
 		this.categories = categories;
 	}
-	
+
 	public InputStream getImageStream() {
 		// TODO
-//		File blob = new File("/path/to/picture.png");
-//		FileInputStream in = new FileInputStream(blob);
+		// File blob = new File("/path/to/picture.png");
+		// FileInputStream in = new FileInputStream(blob);
 		return null;
 	}
-	/////////////////////////////////////////////////////////////////////////////////////
+	// ///////////////////////////////////////////////////////////////////////////////////
 }
