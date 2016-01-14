@@ -12,6 +12,7 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Class Properties
 	private ArrayList<IAnswer> answers = new ArrayList<>();
+	private ArrayList<String> categories = new ArrayList<>();
 	/////////////////////////////////////////////////////////////////////////////////////
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -257,16 +258,20 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	public void setImageLine(int imageLine) {
 		this.imageLine = imageLine;
 	}
-	
-	public String getImageData() {
-		// TODO Auto-generated method stub
-		return null;
+
+	public ArrayList<String> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(ArrayList<String> categories) {
+		this.categories = categories;
 	}
 	
 	public InputStream getImageStream() {
-		// TODO Auto-generated method stub
+		// TODO
+//		File blob = new File("/path/to/picture.png");
+//		FileInputStream in = new FileInputStream(blob);
 		return null;
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
-
 }

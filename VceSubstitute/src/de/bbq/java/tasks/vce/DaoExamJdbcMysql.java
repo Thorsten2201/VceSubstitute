@@ -27,7 +27,8 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 	final String EXAM_TABLE = "exam";
 	final String QUESTION_TABLE = "question";
 	final String ANSWER_TABLE = "answer";
-
+	final String CATEGORY_TABLE = "category";
+	
 	HashMap<Integer, Long> examIds = new HashMap<>();
 	HashMap<Long, Integer> examIdsInv = new HashMap<>();
 	HashMap<Long, Integer> questionIds = new HashMap<>();
@@ -133,10 +134,8 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				statement.setString(2, question.getLanguage());
 				statement.setString(3, question.getQuestionText());
 				//TODO: Image-Blob
-//				File blob = new File("/path/to/picture.png");
-//				FileInputStream in = new FileInputStream(blob);
-				statement.setBinaryStream(4, question.getImageStream()); 
-//				statement.setNull(4, java.sql.Types.BLOB);
+//				statement.setBinaryStream(4, question.getImageStream()); 
+				statement.setNull(4, java.sql.Types.BLOB);
 				statement.setString(5, question.getQuestionFooter());
 				statement.setString(6, question.getAnswerExplanation());
 				statement.setInt(7, question.getImageLine());
@@ -230,21 +229,21 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 			} else if (schoolItemAbstract instanceof IAnswer) {
 				Answer answer = (Answer) schoolItemAbstract;
 				String sql = "INSERT INTO " + ANSWER_TABLE
-						+ " (`courseId`,`lastName`,`firstName`,`birthTime`,`city`, `country`, `houseNumber`, `streetName`, `zipCode`) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+						+ " (`index`,`answerText`,`isTrue`,`position`) VALUES(?, ?, ?, ?);";
 				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-				int answerId = 0;
+//				int answerId = 0;
 				if (answer.hasQuestion()) {
 					if (!this.examIdsInv.containsKey(((ExamItemAbstract) answer.getQuestion()).getId())) {
 						this.saveElement((ExamItemAbstract) answer.getQuestion());
 					}
-					answerId = this.examIdsInv.get(((ExamItemAbstract) answer.getQuestion()).getId());
+//					answerId = this.examIdsInv.get(((ExamItemAbstract) answer.getQuestion()).getId());
 				}
-				statement.setInt(1, answerId);
-				statement.setString(2, answer.getIndex());
-				statement.setString(3, answer.getAnswerText());
-				statement.setBoolean(4, answer.isTrue());
-				statement.setInt(5, answer.getPosition());
+//				statement.setInt(1, answerId);
+				statement.setString(1, answer.getIndex());
+				statement.setString(2, answer.getAnswerText());
+				statement.setBoolean(3, answer.isTrue());
+				statement.setInt(4, answer.getPosition());
 
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
@@ -422,8 +421,8 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				answerIds = new HashMap<>();
 
 				preparedStatement = this.getConnection()
-						.prepareStatement("SELECT `id`,`lastName`,`firstName`,`birthTime`,`city`, "
-								+ " `country`, `houseNumber`, `streetName`, `zipCode` FROM " + QUESTION_TABLE + ";");
+						.prepareStatement("SELECT `id`,`number`,`language`,`questionText`,`image`, "
+								+ " `footer`, `explanation`, `imageLine` FROM " + QUESTION_TABLE + ";");
 				this.resultSet = preparedStatement.executeQuery();
 				while (this.resultSet.next()) {
 					ExamItemAbstract loadItem = (ExamItemAbstract) ExamenVerwaltung.getNewQuestion(true);
@@ -435,7 +434,7 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				}
 
 				preparedStatement = this.getConnection().prepareStatement(
-						"SELECT `id`, `teacherId`, `courseName`, `endTime`, `language`, `needsBeamer`, `roomNumber`, `startTime`, `topic` FROM "
+						"SELECT `id`,`examName`,`language`,`description` FROM "
 								+ EXAM_TABLE + ";");
 				this.resultSet = preparedStatement.executeQuery();
 				while (this.resultSet.next()) {
@@ -448,8 +447,7 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				}
 
 				preparedStatement = this.getConnection()
-						.prepareStatement("SELECT `id`,`courseId`,`lastName`,`firstName`,`birthTime`,`city`, "
-								+ " `country`, `houseNumber`, `streetName`, `zipCode` FROM " + ANSWER_TABLE + ";");
+						.prepareStatement("SELECT `id`,`answerText`,`isTrue`,`position` FROM " + ANSWER_TABLE + ";");
 				resultSet = preparedStatement.executeQuery();
 				while (resultSet.next()) {
 					ExamItemAbstract loadItem = (ExamItemAbstract) ExamenVerwaltung.getNewAnswer(true);
@@ -469,9 +467,9 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 			ExamenVerwaltung.showException(e);
 			return false;
 		}
-		String out = "Aus Datei gelutscht: " + cc + " mal Dummgelaber, " + ct + " Labertaschen und " + cs
-				+ " Hohlköpfe.";
-		ExamenVerwaltung.showMessage("loadAll fertig!\r\n\r\n" + out);
+		String out = ExamenVerwaltung.getText("data.loaded.from.database") + " " + cc + " " + ExamenVerwaltung.getText("exams") + ", " + ct + " "+ ExamenVerwaltung.getText("questions") + " " + ExamenVerwaltung.getText("and") + " " + cs
+				+ " " + ExamenVerwaltung.getText("answers") + ".";
+		ExamenVerwaltung.showMessage(ExamenVerwaltung.getText("load.success") + "\r\n\r\n" + out);
 		return true;
 	}
 
@@ -495,7 +493,7 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				String conString = "jdbc:mysql://" + database + "?user=" + username + "&password=" + password;
 				this.connection = DriverManager.getConnection(conString);
 			} catch (SQLException e) {
-				ExamenVerwaltung.showErrorMessage("Username oder Passwort sind falsch.");
+				ExamenVerwaltung.showErrorMessage("user.passwort.error");
 				this.connection = null;
 				loginDialog = null;
 			}
@@ -639,6 +637,10 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 		case 2:
 			sql = "CREATE TABLE `" + ANSWER_TABLE + "` (id INTEGER NOT NULL AUTO_INCREMENT, `index` NVARCHAR(1), `answerText` TEXT, "
 					+ " `isTrue` BOOL, `position` INTEGER, primary key(id))";
+			break;
+		case 3:
+			sql = "CREATE TABLE `" + CATEGORY_TABLE + "` (id INTEGER NOT NULL AUTO_INCREMENT, `categoryName` NVARCHAR(255), `language` NVARCHAR(255), "
+					+ " `description` NVARCHAR(4096), primary key(id))";		
 			break;
 		}
 
