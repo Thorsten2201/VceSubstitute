@@ -226,13 +226,13 @@ public class PanelQuestion extends JPanel implements ActionListener,
 		}
 		this.refresh = false;
 		refresh();
-		if (index <= this.questionPoolJList.getModel().getSize()) {
-			this.questionPoolJList.setSelectedIndex(index);
-		}
+//		if (index <= this.questionPoolJList.getModel().getSize()) {
+//			this.questionPoolJList.setSelectedIndex(index);
+//		}
 		selectQuestion(this.questionPoolJList.getSelectedValue());
-		if (index <= this.examJList.getModel().getSize()) {
-			this.examJList.setSelectedIndex(index);
-		}
+//		if (index <= this.examJList.getModel().getSize()) {
+//			this.examJList.setSelectedIndex(index);
+//		}
 		if (selectExam) {
 			selectExam(exam);
 		}

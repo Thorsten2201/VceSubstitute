@@ -20,7 +20,7 @@ import org.jdatepicker.impl.UtilDateModel;
  * @author Thorsten2201
  *
  */
-public abstract class PanelAbstract implements ActionListener {
+public abstract class PanelAbstract extends JPanel implements ActionListener {
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = -7952586514775627163L;
@@ -55,6 +55,30 @@ public abstract class PanelAbstract implements ActionListener {
 	}
 
 	// ///////////////////////////////////////////////////////////////////////////////////
+
+	public PanelAbstract() {
+		setOpaque(true);
+		super.setBackground(Color.GREEN);
+		SpringLayout layout = new SpringLayout();
+//		setLayout(layout);
+//		setLayout(new BorderLayout());
+//		PanelEdit2 a = new PanelEdit2();
+//		this.add(a,BorderLayout.EAST);
+//		a.setBounds(200, 100, 300, 200);
+//		layout.putConstraint(SpringLayout.EAST, a, 10, SpringLayout.EAST, this);
+		
+		
+
+
+		contentPane = new JPanel();
+		contentPane.setLayout(layout);
+		contentPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+		
+		// Lay out the panel.
+		Container borderPane = this.contentPane;
+		borderPane.setLayout(new BorderLayout());
+//		borderPane.add(topPanel, BorderLayout.NORTH);
+	}
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Write control[].value to Object
@@ -246,14 +270,7 @@ public abstract class PanelAbstract implements ActionListener {
 		topPanel.setAlignmentY(JComponent.CENTER_ALIGNMENT);
 		topPanel.add(label);
 
-		// Lay out the panel.
-		Container borderPane = this.contentPane;
-		borderPane.setLayout(new BorderLayout());
-		borderPane.add(topPanel, BorderLayout.NORTH);
 
-		contentPane = new JPanel();
-		contentPane.setLayout(layout);
-		contentPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 	}
 
 	public void addCheckBox(JPanel labels, JPanel texts, String name,
@@ -313,5 +330,7 @@ public abstract class PanelAbstract implements ActionListener {
 
 		labels.add(panel);
 	}
+
+	public abstract void ReadData();
 
 }

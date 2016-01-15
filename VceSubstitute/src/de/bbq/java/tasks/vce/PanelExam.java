@@ -408,7 +408,7 @@ public class PanelExam extends JPanel implements ActionListener,
 		// JPanel panelBottom = new JPanel(new GridLayout(1, 3, 10, 10));
 		SpringLayout layout = new SpringLayout();
 		//TODO:
-		JPanel panelBottom = new PanelEdit2(); // JPanel(layout);
+		JPanel panelBottom = new PanelEdit(); // JPanel(layout);
 		panelBottom.setLayout(layout);
 		panelBottom.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
@@ -462,7 +462,7 @@ public class PanelExam extends JPanel implements ActionListener,
 		expandAllNodes(examJTree);
 
 		// JScrollPane teacherScroller = new JScrollPane(this.questionJList);
-		JScrollPane teacherScroller = new JScrollPane(); //
+		JScrollPane teacherScroller = new JScrollPane(examJTree); //
 		teacherScroller.setPreferredSize(new Dimension(206, 300));
 		teacherScroller
 				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -471,8 +471,11 @@ public class PanelExam extends JPanel implements ActionListener,
 		teacherScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		teacherScroller.setBounds(5, 30, 205, 300);
 		// this.add(teacherScroller);
-		panelBottom.add(teacherScroller);
+		this.add(teacherScroller, BorderLayout.WEST);
 
+		PanelEdit editPanel = new PanelEdit();
+		this.add(editPanel, BorderLayout.CENTER);
+		
 		layout.putConstraint(SpringLayout.SOUTH, teacherScroller, 0, SpringLayout.SOUTH, panelBottom);
 		layout.putConstraint(SpringLayout.NORTH, teacherScroller, 0, SpringLayout.NORTH, panelBottom);
 		
@@ -592,13 +595,13 @@ public class PanelExam extends JPanel implements ActionListener,
 		
 		
 		
-//		PanelEdit editPanel = new PanelEdit();
 //		panelBottom.add(editPanel);
 //		panelBottom.setOpaque(true);
 //		panelBottom.setBackground(Color.BLUE);
 //		tookScroller.setVisible(false);
 //		layout.putConstraint(SpringLayout.EAST, teacherScroller, 0, SpringLayout.EAST, editPanel);
-		
+
+		this.add(panelTop, BorderLayout.NORTH);
 		
 		
 		this.add(panelBottom, BorderLayout.CENTER);
