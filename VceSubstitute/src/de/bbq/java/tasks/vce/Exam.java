@@ -27,7 +27,7 @@ public class Exam extends ExamItemAbstract implements IExam {
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = -8838146635169751075L;
-	private static ArrayList<IAnswer> allStudents = new ArrayList<>();
+	private static ArrayList<IAnswer> allAnswers = new ArrayList<>();
 
 	public static boolean load(Exam exam) {
 		exam.id = ExamItemAbstract.getNewId();

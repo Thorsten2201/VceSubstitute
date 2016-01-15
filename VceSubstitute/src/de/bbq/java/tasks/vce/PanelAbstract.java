@@ -331,6 +331,6 @@ public abstract class PanelAbstract extends JPanel implements ActionListener {
 		labels.add(panel);
 	}
 
-	public abstract void ReadData();
+	public abstract void saveData();
 
 }

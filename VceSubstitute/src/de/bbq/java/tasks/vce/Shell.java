@@ -557,7 +557,7 @@ public class Shell {
 					}
 					break;
 				case 5: // Sprache bearbeiten
-					this.course.setLanguage(this.name.toString());
+				
 					break;
 				case 6: // Raum bearbeiten
 //					this.course.setRoomNumber(this.name.toString());
@@ -811,7 +811,7 @@ public class Shell {
 			}
 			break;
 		case DATASOURCE: // refurbished
-			list = ExamenVerwaltung.getCourses(this.teacher);
+			list = null; //TODO: deleted ExamenVerwaltung.getCourses(this.teacher);
 			for (int index = 1; index <= list.size(); index++) {
 				ret.append(index + ". " + list.get(index - 1).toString() + "\n");
 			}

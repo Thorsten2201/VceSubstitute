@@ -21,13 +21,11 @@ public class Question extends ExamItemAbstract implements IQuestion {
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Properties to serialize
 	private int number;
-	private String language;
 	private String questionText;
-	private Image questionImage;
-	private String questionFooter;
 	private String answerExplanation;
-	private int imageLine;
 
+	private Image questionImage;
+	private int imageLine;
 	// ///////////////////////////////////////////////////////////////////////////////////
 
 	// ///////////////////////////////////////////////////////////////////////////////////
@@ -220,14 +218,6 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		this.number = number;
 	}
 
-	public String getLanguage() {
-		return language;
-	}
-
-	public void setLanguage(String language) {
-		this.language = language;
-	}
-
 	public String getQuestionText() {
 		return questionText;
 	}
@@ -249,14 +239,6 @@ public class Question extends ExamItemAbstract implements IQuestion {
 		}
 		this.questionImage = Toolkit.getDefaultToolkit().createImage(
 				outputStream.toByteArray());
-	}
-
-	public String getQuestionFooter() {
-		return questionFooter;
-	}
-
-	public void setQuestionFooter(String questionFooter) {
-		this.questionFooter = questionFooter;
 	}
 
 	public String getAnswerExplanation() {

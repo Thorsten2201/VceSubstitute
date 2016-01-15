@@ -151,7 +151,7 @@ public class FrameEdit extends JFrame implements ActionListener, ComponentListen
 			cal.set(Calendar.MILLISECOND, 0);
 		}
 //		this.courseDF.setEndTime(cal.getTime());
-		this.courseDF.setLanguage(this.languageTextField.getText());
+//		this.courseDF.setLanguage(this.languageTextField.getText());
 //		this.courseDF.setRoomNumber(this.roomNumberTextField.getText());
 //		courseDF.setNeedsBeamer(this.beamerCheckBox.isSelected());
 	}
@@ -394,8 +394,8 @@ public class FrameEdit extends JFrame implements ActionListener, ComponentListen
 		this.endTextField = new JDatePickerImpl(datePanel, new DateLabelFormatter());
 //		addDateTime(labels, texts, "endDatePicker", "Ende:", this.courseDF.getEndTime(), endTextField, hourEndComboBox,
 //				minuteEndComboBox, true);
-		addTextField(labels, texts, "languageTextField", "Sprache:", this.courseDF.getLanguage(),
-				this.languageTextField, true);
+//		addTextField(labels, texts, "languageTextField", "Sprache:", this.courseDF.getLanguage(),
+//				this.languageTextField, true);
 		String roomNr = "";
 //		if (this.courseDF.getRoomNumber() != null) {
 //			roomNr = this.courseDF.getRoomNumber().toString();

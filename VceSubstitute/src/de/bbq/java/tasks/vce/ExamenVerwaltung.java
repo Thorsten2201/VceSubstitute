@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -338,18 +339,6 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		return Exam.getExams();
 	}
 
-	public static ArrayList<IQuestion> getCourses(IQuestion teacher) {
-		ArrayList<IQuestion> ret = new ArrayList<>();
-		for (IQuestion c : getQuestionList()) {
-			if (c.hasExam()) {
-				if (c.getExam().equals(teacher)) {
-					ret.add(c);
-				}
-			}
-		}
-		return ret;
-	}
-
 	public static IQuestion getNewQuestion(boolean random) {
 		return Question.createQuestion(random, selectedDao);
 	}
@@ -386,6 +375,15 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 		DaoExamAbstract.getDaoExam(getSelectedDao()).saveElement(schoolItemAbstract);
 	}
 
+	public static Question getQuestion(IAnswer selectedItem) {
+		for(IQuestion q: getQuestionList()) {
+			if (q.hasAnswer(selectedItem)) {
+				return (Question) q;
+			}
+		}
+		return null;
+	}
+	
 	public void editItem(ExamItemAbstract editItem) {
 		FrameEdit edit = null;
 		boolean found = false;
@@ -480,4 +478,5 @@ public class ExamenVerwaltung extends JFrame implements WindowListener {
 
 	}
 	/////////////////////////////////////////////////////////////////////////////////////
+
 }

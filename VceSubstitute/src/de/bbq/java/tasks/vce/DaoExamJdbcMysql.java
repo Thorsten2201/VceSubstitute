@@ -136,17 +136,15 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 //				statement.setString(1, question.getQuestionName()); `name` = ?, 
 				statement.setInt(1, question.getNumber());
-				statement.setString(2, question.getLanguage());
-				statement.setString(3, question.getQuestionText());
+				statement.setString(2, question.getQuestionText());
 				if(question.getImageStream() == null) {
-					statement.setNull(4, java.sql.Types.BLOB);
+					statement.setNull(3, java.sql.Types.BLOB);
 				} else {
-					statement.setBinaryStream(4, question.getImageStream()); 
+					statement.setBinaryStream(3, question.getImageStream()); 
 				}
-				statement.setString(5, question.getQuestionFooter());
-				statement.setString(6, question.getAnswerExplanation());
-				statement.setInt(7, question.getImageLine());
-				statement.setInt(8, questionId);
+				statement.setString(4, question.getAnswerExplanation());
+				statement.setInt(5, question.getImageLine());
+				statement.setInt(6, questionId);
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
 					throw new SQLException(ExamenVerwaltung.getText("save.failed"));
@@ -194,8 +192,7 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 
 						statement.setInt(1, questionId);
 						statement.setString(2, q.getQuestionName());
-						statement.setString(4, q.getLanguage());
-						int affectedRows = statement.executeUpdate();
+							int affectedRows = statement.executeUpdate();
 						if (affectedRows == 0) {
 							throw new SQLException(ExamenVerwaltung.getText("create.exam.failed.no.rows"));
 						}
@@ -215,12 +212,10 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				PreparedStatement statement = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
 				statement.setInt(1, question.getNumber());
-				statement.setString(2, question.getLanguage());
-				statement.setString(3, question.getQuestionText());
+				statement.setString(2, question.getQuestionText());
 				statement.setBinaryStream(3, question.getImageStream());
-				statement.setString(5, question.getQuestionFooter());
-				statement.setString(6, question.getAnswerExplanation());
-				statement.setInt(7, question.getImageLine());
+				statement.setString(4, question.getAnswerExplanation());
+				statement.setInt(5, question.getImageLine());
 
 				int affectedRows = statement.executeUpdate();
 				if (affectedRows == 0) {
@@ -350,14 +345,12 @@ public class DaoExamJdbcMysql extends DaoExamJdbcAbstract {
 				questionIdsInv.put(resultSet.getInt(1), sqlQuestion.getId());
 				questionIds.put(sqlQuestion.getId(), resultSet.getInt(1));
 				sqlQuestion.setNumber(resultSet.getInt(2));
-				sqlQuestion.setLanguage(resultSet.getString(3));
-				sqlQuestion.setQuestionText(resultSet.getString(4));
+				sqlQuestion.setQuestionText(resultSet.getString(3));
 //				sqlQuestion.setQuestionName(resultSet.getString(3));
-				sqlQuestion.setQuestionImage(resultSet.getBinaryStream(5));
+				sqlQuestion.setQuestionImage(resultSet.getBinaryStream(4));
 //				sqlQuestion.setCategories(categories);
-				sqlQuestion.setQuestionFooter(resultSet.getString(6));
-				sqlQuestion.setAnswerExpailnation(resultSet.getString(7));
-				sqlQuestion.setImageLine(resultSet.getInt(8));
+				sqlQuestion.setAnswerExpailnation(resultSet.getString(5));
+				sqlQuestion.setImageLine(resultSet.getInt(6));
 			
 				//TODO multivalue category
 				return checkIds(sqlQuestion);	 // checkIds();
