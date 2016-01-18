@@ -21,8 +21,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class PanelAnswer extends JPanel implements ActionListener,
-		ListSelectionListener {
+public class PanelAnswer extends JPanel implements ActionListener, ListSelectionListener {
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Static
 	private static final long serialVersionUID = 7573321200815259292L;
@@ -35,8 +34,7 @@ public class PanelAnswer extends JPanel implements ActionListener,
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Controls
-	private JButton createAnswerButton, deleteAnswerButton, addAnswerButton,
-			removeAnswerButton;
+	private JButton createAnswerButton, deleteAnswerButton, addAnswerButton, removeAnswerButton;
 	private JList<IAnswer> answerJList, answerSelectedJList;
 	private JList<IQuestion> questionPoolJList;
 	private DefaultListModel<IAnswer> answerListModel, answerSelectedListModel;
@@ -115,12 +113,9 @@ public class PanelAnswer extends JPanel implements ActionListener,
 				this.questionPoolJList.setSelectedIndex(0);
 			}
 		}
-		this.removeAnswerButton.setEnabled(this.answerSelectedJList
-				.getSelectedValue() != null);
-		this.deleteAnswerButton.setEnabled(this.answerJList.getModel()
-				.getSize() > 0);
-		boolean enable = this.answerJList.getModel().getSize() > 0
-				&& this.answerJList.getSelectedValue() != null;
+		this.removeAnswerButton.setEnabled(this.answerSelectedJList.getSelectedValue() != null);
+		this.deleteAnswerButton.setEnabled(this.answerJList.getModel().getSize() > 0);
+		boolean enable = this.answerJList.getModel().getSize() > 0 && this.answerJList.getSelectedValue() != null;
 		this.addAnswerButton.setEnabled(enable);
 	}
 
@@ -146,8 +141,7 @@ public class PanelAnswer extends JPanel implements ActionListener,
 				}
 			}
 			for (int index = 0; index < this.answerSelectedListModel.size(); index++) {
-				if (!selectedQuestion.hasAnswer(this.answerSelectedListModel
-						.elementAt(index))) {
+				if (!selectedQuestion.hasAnswer(this.answerSelectedListModel.elementAt(index))) {
 					this.answerSelectedListModel.remove(index);
 				}
 			}
@@ -161,14 +155,12 @@ public class PanelAnswer extends JPanel implements ActionListener,
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		if (e.getSource() == this.answerJList) {
-			IAnswer selectedAnswer = (IAnswer) this.answerJList
-					.getSelectedValue();
+			IAnswer selectedAnswer = (IAnswer) this.answerJList.getSelectedValue();
 			if (!this.refresh) {
 				selectAnswer(selectedAnswer);
 			}
 		} else if (e.getSource() == this.questionPoolJList) {
-			IQuestion selectedQuestion = (IQuestion) this.questionPoolJList
-					.getSelectedValue();
+			IQuestion selectedQuestion = (IQuestion) this.questionPoolJList.getSelectedValue();
 			if (!this.refresh) {
 				answerSelectedListModel.clear();
 				for (IAnswer answer : selectedQuestion.getAnswers()) {
@@ -248,8 +240,7 @@ public class PanelAnswer extends JPanel implements ActionListener,
 		panelBottom = new JPanel(new GridLayout(1, 3, 10, 10));
 		this.answerListModel = new DefaultListModel<IAnswer>();
 		this.answerJList = new JList<IAnswer>(this.answerListModel);
-		this.answerJList
-				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.answerJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.answerJList.setLayoutOrientation(JList.VERTICAL);
 		this.answerJList.setVisibleRowCount(1);
 		this.answerJList.addListSelectionListener(this);
@@ -267,8 +258,7 @@ public class PanelAnswer extends JPanel implements ActionListener,
 				}
 				if (index >= 0) {
 					try {
-						ExamenVerwaltung.getInstance().editItem(
-								(ExamItemAbstract) answerListModel.get(index));
+						ExamenVerwaltung.getInstance().editItem((ExamItemAbstract) answerListModel.get(index));
 					} catch (Exception e) {
 						ExamenVerwaltung.showException(e);
 					}
@@ -279,69 +269,36 @@ public class PanelAnswer extends JPanel implements ActionListener,
 		// this.answerJList.setCellRenderer(new ExamListCellRenderer());
 		JScrollPane answerScroller = new JScrollPane(this.answerJList);
 		answerScroller.setPreferredSize(new Dimension(206, 300));
-		answerScroller
-				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		answerScroller
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		answerScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		answerScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		answerScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		answerScroller.setBounds(5, 30, 205, 300);
 		// this.add(pupScroller);
 		panelBottom.add(answerScroller);
 
-		this.createAnswerButton = ExamenVerwaltung.getButton(
-				"newAnswer",
-				5,
-				5,
-				100,
-				20,
-				this,
-				ExamenVerwaltung.getText("New") + " "
-						+ ExamenVerwaltung.getText("answer"),
-				ExamenVerwaltung.getText("New") + " "
-						+ ExamenVerwaltung.getText("answer"));
+		this.createAnswerButton = ExamenVerwaltung.getButton("newAnswer", 5, 5, 100, 20, this,
+				ExamenVerwaltung.getText("New") + " " + ExamenVerwaltung.getText("answer"),
+				ExamenVerwaltung.getText("New") + " " + ExamenVerwaltung.getText("answer"));
 
-		this.deleteAnswerButton = ExamenVerwaltung.getButton(
-				"delAnswer",
-				110,
-				5,
-				100,
-				20,
-				this,
-				ExamenVerwaltung.getText("Delete") + " "
-						+ ExamenVerwaltung.getText("answer"),
-				ExamenVerwaltung.getText("Delete") + " "
-						+ ExamenVerwaltung.getText("answer"));
+		this.deleteAnswerButton = ExamenVerwaltung.getButton("delAnswer", 110, 5, 100, 20, this,
+				ExamenVerwaltung.getText("Delete") + " " + ExamenVerwaltung.getText("answer"),
+				ExamenVerwaltung.getText("Delete") + " " + ExamenVerwaltung.getText("answer"));
 		panelCreate.add(this.createAnswerButton);
 		panelCreate.add(this.deleteAnswerButton);
 
-		this.addAnswerButton = ExamenVerwaltung.getButton(
-				"addQuestion",
-				235,
-				5,
-				205,
-				20,
-				this,
+		this.addAnswerButton = ExamenVerwaltung.getButton("addQuestion", 235, 5, 205, 20, this,
 				ExamenVerwaltung.getText("Add") + " ->",
-				ExamenVerwaltung.getText("Add") + " "
-						+ ExamenVerwaltung.getText("question"));
+				ExamenVerwaltung.getText("Add") + " " + ExamenVerwaltung.getText("question"));
 		panelTop.add(this.addAnswerButton);
 
-		this.removeAnswerButton = ExamenVerwaltung.getButton(
-				"remCourse",
-				470,
-				5,
-				205,
-				20,
-				this,
+		this.removeAnswerButton = ExamenVerwaltung.getButton("remCourse", 470, 5, 205, 20, this,
 				"<- " + ExamenVerwaltung.getText("Remove"),
-				ExamenVerwaltung.getText("Remove") + " "
-						+ ExamenVerwaltung.getText("question"));
+				ExamenVerwaltung.getText("Remove") + " " + ExamenVerwaltung.getText("question"));
 		panelTop.add(this.removeAnswerButton);
 
 		this.questionPoolListModel = new DefaultListModel<>();
 		this.questionPoolJList = new JList<IQuestion>(questionPoolListModel);
-		this.questionPoolJList
-				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.questionPoolJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.questionPoolJList.setLayoutOrientation(JList.VERTICAL);
 		this.questionPoolJList.setVisibleRowCount(1);
 		this.questionPoolJList.addListSelectionListener(this);
@@ -358,9 +315,8 @@ public class PanelAnswer extends JPanel implements ActionListener,
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung.getInstance().editItem(
-							(ExamItemAbstract) (questionPoolJList).getModel()
-									.getElementAt(index));
+					ExamenVerwaltung.getInstance()
+							.editItem((ExamItemAbstract) (questionPoolJList).getModel().getElementAt(index));
 					refresh();
 				}
 			}
@@ -368,19 +324,15 @@ public class PanelAnswer extends JPanel implements ActionListener,
 		this.questionPoolJList.setCellRenderer(new ExamListCellRenderer());
 		JScrollPane poolScroller = new JScrollPane(this.questionPoolJList);
 		poolScroller.setPreferredSize(new Dimension(206, 300));
-		poolScroller
-				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		poolScroller
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		poolScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		poolScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		poolScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		poolScroller.setBounds(235, 30, 205, 300);
 		panelBottom.add(poolScroller);
 
 		this.answerSelectedListModel = new DefaultListModel<>();
-		this.answerSelectedJList = new JList<IAnswer>(
-				this.answerSelectedListModel);
-		this.answerSelectedJList
-				.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		this.answerSelectedJList = new JList<IAnswer>(this.answerSelectedListModel);
+		this.answerSelectedJList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		this.answerSelectedJList.setLayoutOrientation(JList.VERTICAL);
 		this.answerSelectedJList.setVisibleRowCount(1);
 		this.answerSelectedJList.addMouseListener(new MouseAdapter() {
@@ -396,20 +348,16 @@ public class PanelAnswer extends JPanel implements ActionListener,
 					index = list.locationToIndex(evt.getPoint());
 				}
 				if (index >= 0) {
-					ExamenVerwaltung
-							.getInstance()
-							.editItem(
-									(ExamItemAbstract)questionPoolJList.getModel().getElementAt(index));
+					ExamenVerwaltung.getInstance()
+							.editItem((ExamItemAbstract) questionPoolJList.getModel().getElementAt(index));
 					refresh();
 				}
 			}
 		});
 		JScrollPane tookScroller = new JScrollPane(this.answerSelectedJList);
 		tookScroller.setPreferredSize(new Dimension(206, 300));
-		tookScroller
-				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		tookScroller
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		tookScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		tookScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		tookScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		tookScroller.setBounds(470, 30, 205, 300);
 		panelBottom.add(tookScroller);

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.swing.*;
+import javax.swing.SpringLayout.Constraints;
 
 import java.awt.*;
 
@@ -33,7 +34,8 @@ public class FrameEdit extends JFrame implements ActionListener, ComponentListen
 	private final int labelWidth = 110;
 	private final int buttonWidth = 100;
 	private final int dateHeight = 26;
-
+	private Constraints constraintsSouthAnswers;
+	
 	private Question courseDF;
 	private Question teacherDF;
 	private Answer studentDF;

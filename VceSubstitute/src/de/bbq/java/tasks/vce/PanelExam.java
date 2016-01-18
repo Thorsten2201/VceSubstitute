@@ -61,15 +61,13 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 
 	// ///////////////////////////////////////////////////////////////////////////////////
 	// Controls
-	private JButton addExamButton, deleteQuestionButton, addSolutionButton,
-			removeSolutionButton;
+	private JButton addExamButton, deleteQuestionButton, addSolutionButton, removeSolutionButton;
 
 	private JTree examJTree;
 	private DefaultMutableTreeNode root;
 
 	private int labelWidth = 200;
-	public PanelEdit panelEdit = new PanelEdit();
-
+	public PanelEdit panelEdit;
 	// ///////////////////////////////////////////////////////////////////////////////////
 
 	// ///////////////////////////////////////////////////////////////////////////////////
@@ -110,13 +108,11 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 		// }
 		// }
 
-		for (Iterator<IExam> iterExam = ExamenVerwaltung.getExamList()
-				.iterator(); iterExam.hasNext();) {
+		for (Iterator<IExam> iterExam = ExamenVerwaltung.getExamList().iterator(); iterExam.hasNext();) {
 			IExam exam = (IExam) iterExam.next();
 			TreePath examPath = findNode(exam);
 			if (examPath == null) {
-				DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(
-						exam);
+				DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(exam);
 				newNode.setUserObject(exam);
 				int childCount = this.root.getChildCount();
 				this.root.insert(newNode, childCount);
@@ -127,25 +123,21 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 			}
 
 			DefaultMutableTreeNode examNode = getNodeFromPath(examPath);
-			for (Iterator<IQuestion> iterQuestion = exam.getQuestions()
-					.iterator(); iterQuestion.hasNext();) {
+			for (Iterator<IQuestion> iterQuestion = exam.getQuestions().iterator(); iterQuestion.hasNext();) {
 				IQuestion question = (IQuestion) iterQuestion.next();
 				TreePath questionPath = findNode(question);
 				if (questionPath == null) {
-					DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(
-							question);
+					DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(question);
 					subNode.setUserObject(question);
 					examNode.insert(subNode, examNode.getChildCount());
 					questionPath = findNode(question);
 				}
 				DefaultMutableTreeNode answerNode = getNodeFromPath(questionPath);
-				for (Iterator<IAnswer> iterAnswer = question.getAnswers()
-						.iterator(); iterAnswer.hasNext();) {
+				for (Iterator<IAnswer> iterAnswer = question.getAnswers().iterator(); iterAnswer.hasNext();) {
 					IAnswer answer = (IAnswer) iterAnswer.next();
 					TreePath answerPath = findNode(answer);
 					if (answerPath == null) {
-						DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(
-								answer);
+						DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(answer);
 						subNode.setUserObject(answer);
 						answerNode.insert(subNode, answerNode.getChildCount());
 					}
@@ -163,8 +155,7 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 	}
 
 	private TreePath findNode(IQuestion solution) {
-		Enumeration<DefaultMutableTreeNode> deepE = root
-				.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			if (node.getUserObject() instanceof IQuestion) {
@@ -178,8 +169,7 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 	}
 
 	private TreePath findNode(IAnswer solution) {
-		Enumeration<DefaultMutableTreeNode> deepE = root
-				.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			if (node.getUserObject() instanceof IAnswer) {
@@ -193,12 +183,10 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 	}
 
 	private void expandAllNodes(JTree tree) {
-		DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tree
-				.getModel().getRoot();
+		DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tree.getModel().getRoot();
 		int count = tree.getModel().getChildCount(rootNode);
 		for (int i = 0; i < count; i++) {
-			DefaultMutableTreeNode tempNode = (DefaultMutableTreeNode) tree
-					.getModel().getChild(rootNode, i);
+			DefaultMutableTreeNode tempNode = (DefaultMutableTreeNode) tree.getModel().getChild(rootNode, i);
 			TreePath path = new TreePath(tempNode.getPath());
 			tree.expandPath(path);
 			// tree.expandRow(i);
@@ -206,8 +194,7 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 	}
 
 	private DefaultMutableTreeNode getNodeFromPath(TreePath p) {
-		Enumeration<DefaultMutableTreeNode> deepE = root
-				.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			TreePath checkPath = new TreePath(node.getPath());
@@ -219,8 +206,7 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 	}
 
 	private TreePath findNode(String s) {
-		Enumeration<DefaultMutableTreeNode> deepE = root
-				.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			if (node.toString().equalsIgnoreCase(s)) {
@@ -231,8 +217,7 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 	}
 
 	private TreePath findNode(IExam e) {
-		Enumeration<DefaultMutableTreeNode> deepE = root
-				.depthFirstEnumeration();
+		Enumeration<DefaultMutableTreeNode> deepE = root.depthFirstEnumeration();
 		while (deepE.hasMoreElements()) {
 			DefaultMutableTreeNode node = deepE.nextElement();
 			if (node.getUserObject() instanceof IExam) {
@@ -260,9 +245,11 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 	public void valueChanged(TreeSelectionEvent arg0) {
 		System.out.println(arg0.getPath());
 		checkButtons();
-		this.panelEdit.editItem(getSelectedItem());
+		if (getSelectedItem() != null) {
+			this.panelEdit.editItem(getSelectedItem());
+		}
 	}
-	
+
 	// ///////////////////////////////////////////////////////////////////////////////////
 
 	// ///////////////////////////////////////////////////////////////////////////////////
@@ -275,20 +262,16 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 			ExamenVerwaltung.getNewExam(true);
 			// index = this.questionJList.getModel().getSize();
 		} else if (arg0.getSource() == this.deleteQuestionButton) {
-			if (!ExamenVerwaltung.getQuestionList().contains(
-					this.selectedQuestion)) {
+			if (!ExamenVerwaltung.getQuestionList().contains(this.selectedQuestion)) {
 			}
 			if (this.selectedQuestion != null) {
-				ExamenVerwaltung
-						.deleteElement((ExamItemAbstract) this.selectedQuestion);
+				ExamenVerwaltung.deleteElement((ExamItemAbstract) this.selectedQuestion);
 				this.selectedQuestion = null;
 			}
 		}
 		if (arg0.getSource() == this.addSolutionButton) {
 			panelEdit.saveData();
-			
-			
-			
+
 		} else if (arg0.getSource() == this.removeSolutionButton) {
 			TreePath selected = this.examJTree.getSelectionPath();
 			DefaultMutableTreeNode check = getNodeFromPath(selected);
@@ -331,14 +314,12 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 
 		this.add(panelTop, BorderLayout.NORTH);
 
-		this.root = new DefaultMutableTreeNode(
-				ExamenVerwaltung.getText("Exams"));
+		this.root = new DefaultMutableTreeNode(ExamenVerwaltung.getText("Exams"));
 		examJTree = new JTree(root);
 		examJTree.setShowsRootHandles(true);
 		examJTree.setRootVisible(false);
 		examJTree.addTreeSelectionListener(this);
-		examJTree.getSelectionModel().setSelectionMode(
-				TreeSelectionModel.SINGLE_TREE_SELECTION);
+		examJTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		// ImageIcon imageIcon = new
 		// ImageIcon(TreeExample.class.getResource("/leaf.jpg"));
 		DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
@@ -350,38 +331,36 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 		// JScrollPane teacherScroller = new JScrollPane(this.questionJList);
 		JScrollPane teacherScroller = new JScrollPane(examJTree); //
 		teacherScroller.setPreferredSize(new Dimension(206, 300));
-		teacherScroller
-				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		teacherScroller
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		teacherScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		teacherScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		teacherScroller.setViewportBorder(new LineBorder(Color.BLACK));
 		teacherScroller.setBounds(5, 30, 205, 300);
 		// this.add(teacherScroller);
 		this.add(teacherScroller, BorderLayout.WEST);
 
-		this.add(this.panelEdit, BorderLayout.CENTER);
 
-		layout.putConstraint(SpringLayout.SOUTH, teacherScroller, 0,
-				SpringLayout.SOUTH, panelBottom);
-		layout.putConstraint(SpringLayout.NORTH, teacherScroller, 0,
-				SpringLayout.NORTH, panelBottom);
+		// editScroller.setViewportBorder(new LineBorder(Color.BLACK));
+//		editScroller.setBounds(5, 30, 205, 300);
+		// this.add(teacherScroller);
 
-		this.addExamButton = ExamenVerwaltung.getButton("newTeacher", 5, 5,
-				100, 20, this, "Erstellen", "Neuer Leerer");
-		this.deleteQuestionButton = ExamenVerwaltung.getButton("delTeacher",
-				110, 5, 100, 20, this, "Löschen", "Leerer löschen");
+		layout.putConstraint(SpringLayout.SOUTH, teacherScroller, 0, SpringLayout.SOUTH, panelBottom);
+		layout.putConstraint(SpringLayout.NORTH, teacherScroller, 0, SpringLayout.NORTH, panelBottom);
+
+		this.addExamButton = ExamenVerwaltung.getButton("newTeacher", 5, 5, 100, 20, this, "Erstellen", "Neuer Leerer");
+		this.deleteQuestionButton = ExamenVerwaltung.getButton("delTeacher", 110, 5, 100, 20, this, "Löschen",
+				"Leerer löschen");
 		// this.add(this.addTeacherButton);
 		// this.add(this.deleteTeacherButton);
 		panelCreate.add(this.addExamButton);
 		panelCreate.add(this.deleteQuestionButton);
 
-		this.addSolutionButton = ExamenVerwaltung.getButton("saveQuestion", 235,
-				5, 205, 20, this, "Speichern", "Speichern");
+		this.addSolutionButton = ExamenVerwaltung.getButton("saveQuestion", 235, 5, 205, 20, this, "Speichern",
+				"Speichern");
 		// this.add(this.addCourseButton);
 		panelTop.add(this.addSolutionButton);
 
-		this.removeSolutionButton = ExamenVerwaltung.getButton("remCourse",
-				470, 5, 205, 20, this, "<- Entfernen", "Kurs Entfernen");
+		this.removeSolutionButton = ExamenVerwaltung.getButton("remCourse", 470, 5, 205, 20, this, "<- Entfernen",
+				"Kurs Entfernen");
 		// this.add(this.removeCourseButton);
 		panelTop.add(this.removeSolutionButton);
 
@@ -410,11 +389,22 @@ public class PanelExam extends JPanel implements ActionListener, TreeSelectionLi
 		this.add(panelTop, BorderLayout.NORTH);
 
 		this.add(panelBottom, BorderLayout.SOUTH);
+
+		
+
+		JScrollPane editScroller = new JScrollPane(new JPanel(new PanelEdit()),
+		        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
+		        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		this.add(editScroller, BorderLayout.CENTER);
+		editScroller.doLayout();
+		editScroller.setSize(new Dimension(100000,20000));
+		editScroller.setPreferredSize(new Dimension(15, 20));
+		editScroller.getViewport().revalidate();
+//        setLayout(null);
 		this.refresh = false;
 
 	}
 
 	// ///////////////////////////////////////////////////////////////////////////////////
-
 
 }
